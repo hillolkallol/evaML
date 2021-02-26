@@ -4,7 +4,34 @@
 
 from sklearn.neighbors import KNeighborsClassifier
 
-class KNearestNeighbors:
+
+class MLModel:
+    __START_DATA_SIZE = 100
+    __INCREMENT_RATE = 5
+
+    def _learning_curve(self, model, X_train, y_train, X_val, y_val):
+        start = self.__START_DATA_SIZE
+        end = len(y_train)
+        increment = int((end * self.__INCREMENT_RATE) / 100)
+        train_scores = []
+        val_scores = []
+
+        for data_size in range(start, end, increment):
+            model.fit(X_train[:data_size, :], y_train[:data_size])
+
+            train_score = model.score(X_train[:data_size, :], y_train[:data_size])
+            val_score = model.score(X_val, y_val)
+
+            train_scores.append(train_score)
+            val_scores.append(val_score)
+
+            # print(data_size, train_score, val_score)
+
+        # pass the scores to visualize the learning curve and store it in the disk
+        return val_scores[-1]
+
+
+class KNearestNeighbors(MLModel):
     """
     parameter : type = default
     --------------------------
@@ -17,6 +44,7 @@ class KNearestNeighbors:
     min_p: int = 1,
     max_p: int = 5
     """
+
     def __init__(self, min_neighbors=5,
                  max_neighbors=20,
                  weights=['uniform', 'distance'],
@@ -37,6 +65,7 @@ class KNearestNeighbors:
     """
     
     """
+
     def evaluate_knn(self, X_train, y_train, X_val, y_val):
         scores = [['k_neighbors', 'weight', 'algorithm', 'leaf_size', 'p', 'score'],
                   ['-----------', '------', '---------', '---------', '-', '-----']]
@@ -50,11 +79,10 @@ class KNearestNeighbors:
                                                              algorithm=algorithm,
                                                              leaf_size=leaf_size,
                                                              p=p)
-                            knn_model.fit(X_train, y_train)
-                            score = knn_model.score(X_val, y_val)
-                            evaluation = [k_neighbors, weight, algorithm, leaf_size, p, str(round(score*100, 2)) + '%']
+
+                            score = self._learning_curve(knn_model, X_train, y_train, X_val, y_val)
+
+                            evaluation = [k_neighbors, weight, algorithm, leaf_size, p,
+                                          str(round(score * 100, 2)) + '%']
                             scores.append(evaluation)
         return scores
-
-    def learning_curve(self, ):
-        pass
