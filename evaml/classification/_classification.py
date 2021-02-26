@@ -57,3 +57,4 @@ class KNearestNeighbors:
         return scores
 
     def learning_curve(self, ):
+        pass
