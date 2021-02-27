@@ -174,6 +174,22 @@ class KNearestNeighbors(MLModel):
             # for result in results:
             #     print(result)
 
+    def evaluate_knn_multithreading(self, X_train, y_train, X_val, y_val):
+        """
+
+        :param X_train:
+        :param y_train:
+        :param X_val:
+        :param y_val:
+        :return:
+        """
+        params = self._generate_params(X_train, y_train, X_val, y_val)
+
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            results = executor.map(self.evaluate_knn, params)
+            # for result in results:
+            #     print(result)
+
     def evaluate_knn_singleprocessing(self, X_train, y_train, X_val, y_val):
         """
 
