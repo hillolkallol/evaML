@@ -2,7 +2,7 @@ from sklearn import datasets
 from sklearn.model_selection import train_test_split
 from evaml.classification import evaluate
 
-# import hand-written digits dataset
+# import dataset
 iris = datasets.load_iris()
 X = iris.data[:, :2]  # we only take the first two features.
 y = iris.target
