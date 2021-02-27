@@ -3,16 +3,20 @@
 # Authors: Kallol Das <kalloldash@gmail.com>
 
 from sklearn.neighbors import KNeighborsClassifier
-
+from sklearn.experimental import enable_halving_search_cv
+from sklearn.model_selection import HalvingGridSearchCV
 
 class MLModel:
-    __START_DATA_SIZE = 100
-    __INCREMENT_RATE = 5
+    _START_DATA_SIZE = 100
+    _INCREMENT_RATE = 5
+
+    def _grid_search(self, model, param_grid, X, y):
+        return HalvingGridSearchCV(model, param_grid).fit(X, y)
 
     def _learning_curve(self, model, X_train, y_train, X_val, y_val):
-        start = self.__START_DATA_SIZE
+        start = self._START_DATA_SIZE
         end = len(y_train)
-        increment = int((end * self.__INCREMENT_RATE) / 100)
+        increment = int((end * self._INCREMENT_RATE) / 100)
         train_scores = []
         val_scores = []
 
@@ -45,30 +49,41 @@ class KNearestNeighbors(MLModel):
     max_p: int = 5
     """
 
-    def __init__(self, min_neighbors=5,
-                 max_neighbors=20,
+    def __init__(self,
+                 min_neighbors=5,
+                 max_neighbors=21,
                  weights=['uniform', 'distance'],
                  algorithms=['auto', 'ball_tree', 'kd_tree', 'brute'],
                  min_leaf_size=20,
                  max_leaf_size=30,
                  min_p=1,
                  max_p=5):
-        self.min_neighbors = min_neighbors
-        self.max_neighbors = max_neighbors
+        self.neighbors = [k_neighbors for k_neighbors in range(min_neighbors, max_neighbors+1, 2)]
         self.weights = weights
         self.algorithms = algorithms
-        self.min_leaf_size = min_leaf_size
-        self.max_leaf_size = max_leaf_size
-        self.min_p = min_p
-        self.max_p = max_p
+        self.leaf_size = [leaf_size for leaf_size in range(min_leaf_size, max_leaf_size+1)]
+        self.p = [p for p in range(min_p, max_p+1)]
 
     """
-    
+    https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.HalvingGridSearchCV.html#sklearn.model_selection.HalvingGridSearchCV
+    https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.learning_curve.html#sklearn.model_selection.learning_curve
     """
 
     def evaluate_knn(self, X_train, y_train, X_val, y_val):
-        scores = [['k_neighbors', 'weight', 'algorithm', 'leaf_size', 'p', 'score'],
-                  ['-----------', '------', '---------', '---------', '-', '-----']]
+        knn_model = KNeighborsClassifier()
+        param_grid = {'n_neighbors' : self.neighbors,
+                     'weights' : self.weights,
+                     'algorithm' : self.algorithms,
+                     'leaf_size' : self.leaf_size,
+                     'p' : self.p}
+
+        halving_grid_search = self._grid_search(knn_model, param_grid, X_train, y_train)
+        best_model = halving_grid_search.best_estimator_
+        score = halving_grid_search.best_score_
+        print(halving_grid_search.cv_results_)
+
+    def evaluate_knn2(self, X_train, y_train, X_val, y_val):
+        scores = []
         for k_neighbors in range(self.min_neighbors, self.max_neighbors):
             for weight in self.weights:
                 for algorithm in self.algorithms:
@@ -84,5 +99,12 @@ class KNearestNeighbors(MLModel):
 
                             evaluation = [k_neighbors, weight, algorithm, leaf_size, p,
                                           str(round(score * 100, 2)) + '%']
+                            print(evaluation)
                             scores.append(evaluation)
         return scores
+
+
+"""
+['k_neighbors', 'weight', 'algorithm', 'leaf_size', 'p', 'score'],
+['-----------', '------', '---------', '---------', '-', '-----']
+"""

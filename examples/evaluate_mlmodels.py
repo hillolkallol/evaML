@@ -11,5 +11,5 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=.2, random_s
 print('Evaluating ML Models...')
 evaluation_metrics = evaluate(X_train, y_train, X_test, y_test)
 
-for row in evaluation_metrics[0]:
-    print(row)
+# for row in evaluation_metrics[0]:
+#     print(row)
