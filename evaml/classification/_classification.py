@@ -5,9 +5,12 @@
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.experimental import enable_halving_search_cv
 from sklearn.model_selection import HalvingGridSearchCV
+import concurrent.futures
+import itertools
+
 
 class MLModel:
-    _START_DATA_SIZE = 100
+    _START_DATA_SIZE = 25
     _INCREMENT_RATE = 5
 
     def _grid_search(self, model, param_grid, X, y):
@@ -48,7 +51,6 @@ class KNearestNeighbors(MLModel):
     min_p: int = 1,
     max_p: int = 5
     """
-
     def __init__(self,
                  min_neighbors=5,
                  max_neighbors=21,
@@ -65,11 +67,9 @@ class KNearestNeighbors(MLModel):
         self.p = [p for p in range(min_p, max_p+1)]
 
     """
-    https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.HalvingGridSearchCV.html#sklearn.model_selection.HalvingGridSearchCV
-    https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.learning_curve.html#sklearn.model_selection.learning_curve
+    
     """
-
-    def evaluate_knn(self, X_train, y_train, X_val, y_val):
+    def evaluate_knn_grid_search(self, X_train, y_train, X_val, y_val):
         knn_model = KNeighborsClassifier()
         param_grid = {'n_neighbors' : self.neighbors,
                      'weights' : self.weights,
@@ -82,29 +82,38 @@ class KNearestNeighbors(MLModel):
         score = halving_grid_search.best_score_
         print(halving_grid_search.cv_results_)
 
-    def evaluate_knn2(self, X_train, y_train, X_val, y_val):
-        scores = []
-        for k_neighbors in range(self.min_neighbors, self.max_neighbors):
-            for weight in self.weights:
-                for algorithm in self.algorithms:
-                    for leaf_size in range(self.min_leaf_size, self.max_leaf_size):
-                        for p in range(self.min_p, self.max_p):
-                            knn_model = KNeighborsClassifier(n_neighbors=k_neighbors,
-                                                             weights=weight,
-                                                             algorithm=algorithm,
-                                                             leaf_size=leaf_size,
-                                                             p=p)
+    def evaluate_knn(self, param):
+        # print("Evaluating for params: ", k_neighbors, weight, algorithm, leaf_size, p)
+        X_train, y_train, X_val, y_val, k_neighbors, weight, algorithm, leaf_size, p = param
 
-                            score = self._learning_curve(knn_model, X_train, y_train, X_val, y_val)
+        knn_model = KNeighborsClassifier(n_neighbors=k_neighbors,
+                                         weights=weight,
+                                         algorithm=algorithm,
+                                         leaf_size=leaf_size,
+                                         p=p)
 
-                            evaluation = [k_neighbors, weight, algorithm, leaf_size, p,
-                                          str(round(score * 100, 2)) + '%']
-                            print(evaluation)
-                            scores.append(evaluation)
-        return scores
+        knn_model.fit(X_train, y_train)
+        score = self._learning_curve(knn_model, X_train, y_train, X_val, y_val) # knn_model.score(X_val, y_val)
+        evaluation = [k_neighbors, weight, algorithm, leaf_size, p, str(round(score * 100, 2)) + '%']
+        # print(evaluation)
+        return evaluation
 
+    def evaluate_knn_multiprocessing(self, X_train, y_train, X_val, y_val):
+        params = self._generate_params(X_train, y_train, X_val, y_val)
 
-"""
-['k_neighbors', 'weight', 'algorithm', 'leaf_size', 'p', 'score'],
-['-----------', '------', '---------', '---------', '-', '-----']
-"""
+        with concurrent.futures.ProcessPoolExecutor() as executor:
+            results = executor.map(self.evaluate_knn, params)
+
+            # for result in results:
+            #     print(result)
+
+    def evaluate_knn_single(self, X_train, y_train, X_val, y_val):
+        params = self._generate_params(X_train, y_train, X_val, y_val)
+
+        for param in params:
+            self.evaluate_knn(param)
+
+    def _generate_params(self, X_train, y_train, X_val, y_val):
+        return [(X_train, y_train, X_val, y_val) + p_tuple
+                for p_tuple in
+                itertools.product(self.neighbors, self.weights, self.algorithms, self.leaf_size, self.p)]
