@@ -33,3 +33,20 @@ def _generate_params_test():
 
 
 _generate_params_test()
+
+
+# from numba import njit
+# import numpy as np
+#
+# class KNearestNeighborsTest():
+#     def __init__(self):
+#         pass
+#
+#     @staticmethod
+#     @njit
+#     def test():
+#         for a in np.zeros(10):
+#             print(a)
+#
+# obj = KNearestNeighborsTest()
+# obj.test()

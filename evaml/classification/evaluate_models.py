@@ -32,26 +32,6 @@ import time
 
 __classifiers_list__ = [KNearestNeighbors()]
 
-"""
-PARAMETERS:
-----------
-X_train : array like, default=None
-    
-y_train : array like, default=None
-
-X_test : array like, default=None
-
-y_test : array like, default=None
-
-classifiers : list, default=classifiers_list
-    List of all the ML classifiers
-
-evaluation_size : string, default='big'
-    Iterations vary based on this parameter. Values are: small, medium, big.
-    
-n_jobs : int, default=10
-    Runs at most n_jobs parallelly
-"""
 def evaluate(X_train=None,
              y_train=None,
              X_test=None,
@@ -59,19 +39,42 @@ def evaluate(X_train=None,
              classifiers=__classifiers_list__,
              evaluation_size='big',
              n_jobs=10):
+    """
 
-    evaluation_metrics = []
+    :param X_train:
+    :param y_train:
+    :param X_test:
+    :param y_test:
+    :param classifiers:
+    :param evaluation_size:
+    :param n_jobs:
+    :return:
+    """
+    evaluation_metrics_all_models = {}
     X, X_val, y, y_val = train_test_split(X_train, y_train, test_size=.2, random_state=42)
 
     for classifier in __classifiers_list__:
+
         start = time.time()
-        scores = classifier.evaluate_knn_multiprocessing(X, y, X_val, y_val)
+        evaluation_metrics = classifier.evaluate_knn_multiprocessing(X, y, X_val, y_val)
         end = time.time()
-        print("MP time taken: ", end - start)
+        print("time taken: ", end - start)
 
-        evaluation_metrics.append(scores)
+        evaluation_metrics_all_models[classifier.__class__.__name__] = evaluation_metrics
+        generate_full_report(evaluation_metrics_all_models)
 
-    return evaluation_metrics
+    return evaluation_metrics_all_models
 
-def generate_report(evaluation_metrics):
+def generate_summary(evaluation_metrics_all_models):
     pass
+
+def generate_full_report(evaluation_metrics_all_models):
+    # print("{:<10} {:<10} {:<10}".format('NAME', 'AGE', 'COURSE'))
+
+    # print each data item.
+    for classifer, classiferval in evaluation_metrics_all_models.items():
+        for paramset, paramval in classiferval.items():
+            neighbors, weight, algorithm, leaf_size, p, _ = paramval
+            print("{:<10} {:<10} {:<10} {:<10} {:<10} {:<10} {:<10}".format(classifer,
+                                                    paramset,
+                                                    neighbors, weight, algorithm, leaf_size, p))

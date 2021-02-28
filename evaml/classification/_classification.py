@@ -31,6 +31,8 @@ from sklearn.experimental import enable_halving_search_cv
 from sklearn.model_selection import HalvingGridSearchCV
 import concurrent.futures
 import itertools
+from sklearn.metrics import classification_report
+from sklearn.metrics import confusion_matrix
 
 
 class MLModel:
@@ -38,7 +40,6 @@ class MLModel:
 
     :argument
     """
-
     _START_DATA_SIZE = 25
     _INCREMENT_RATE = 5
 
@@ -54,7 +55,7 @@ class MLModel:
 
         return HalvingGridSearchCV(model, param_grid).fit(X, y)
 
-    def _learning_curve(self, model, X_train, y_train, X_val, y_val):
+    def _generate_evaluation_metrics(self, model, X_train, y_train, X_val, y_val):
         """
 
         :param model:
@@ -64,25 +65,34 @@ class MLModel:
         :param y_val:
         :return:
         """
+        metrics_analysis = {}
+
         start = self._START_DATA_SIZE
         end = len(y_train)
         increment = int((end * self._INCREMENT_RATE) / 100)
-        train_scores = []
-        val_scores = []
 
         for data_size in range(start, end, increment):
             model.fit(X_train[:data_size, :], y_train[:data_size])
+            y_pred = model.predict(X_val)
 
-            train_score = model.score(X_train[:data_size, :], y_train[:data_size])
-            val_score = model.score(X_val, y_val)
+            classification_report = self._classification_report(y_val, y_pred)
+            confusion_matrix = self._generate_confusion_matrix(y_val, y_pred)
 
-            train_scores.append(train_score)
-            val_scores.append(val_score)
+            analysis = {'classification-report' : classification_report,
+                        'confusion-matrix' : confusion_matrix}
 
-            # print(data_size, train_score, val_score)
+            metrics_analysis['data-size-' + str(data_size)] = analysis
 
-        # pass the scores to visualize the learning curve and store it in the disk
-        return val_scores[-1]
+        return metrics_analysis
+
+    def _calculate_accuracy(self, model, X, y, data_size):
+        return model.score(X[:data_size, :], y[:data_size])
+
+    def _classification_report(self, y_true, y_pred):
+        return classification_report(y_true, y_pred)
+
+    def _generate_confusion_matrix(self, y_true, y_pred):
+        return confusion_matrix(y_true, y_pred)
 
 
 class KNearestNeighbors(MLModel):
@@ -116,9 +126,112 @@ class KNearestNeighbors(MLModel):
         self.leaf_size = [leaf_size for leaf_size in range(min_leaf_size, max_leaf_size+1)]
         self.p = [p for p in range(min_p, max_p+1)]
 
-    def evaluate_knn_grid_search(self, X_train, y_train, X_val, y_val):
+    def evaluate_knn(self, param):
         """
 
+        :param param:
+        :return:
+        """
+        X_train, y_train, X_val, y_val, k_neighbors, weight, algorithm, leaf_size, p = param
+
+        knn_model = KNeighborsClassifier(n_neighbors=k_neighbors,
+                                         weights=weight,
+                                         algorithm=algorithm,
+                                         leaf_size=leaf_size,
+                                         p=p)
+        evaluation_metrics = {}
+
+        metrics_analysis = self._generate_evaluation_metrics(knn_model, X_train, y_train, X_val, y_val)
+
+        evaluation_metrics['neighbors'] = k_neighbors
+        evaluation_metrics['weight'] = weight
+        evaluation_metrics['algorithm'] = algorithm
+        evaluation_metrics['leaf-size'] = leaf_size
+        evaluation_metrics['p'] = p
+        evaluation_metrics['metrics_analysis'] = metrics_analysis
+
+        return evaluation_metrics
+
+    def evaluate_knn_multiprocessing(self, X_train, y_train, X_val, y_val):
+        """
+
+        :param X_train:
+        :param y_train:
+        :param X_val:
+        :param y_val:
+        :return:
+        """
+        params = self._generate_params(X_train, y_train, X_val, y_val)
+        analysis_result = {}
+
+        with concurrent.futures.ProcessPoolExecutor() as executor:
+            results = executor.map(self.evaluate_knn, params)
+
+            param_set = 1
+            for result in results:
+                analysis_result['param-set-' + str(param_set)] = result
+                param_set += 1
+
+        return analysis_result
+
+    def evaluate_knn_multithreading(self, X_train, y_train, X_val, y_val):
+        """
+
+        :param X_train:
+        :param y_train:
+        :param X_val:
+        :param y_val:
+        :return:
+        """
+        params = self._generate_params(X_train, y_train, X_val, y_val)
+        analysis_result = {}
+
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            results = executor.map(self.evaluate_knn, params)
+
+            param_set = 1
+            for result in results:
+                analysis_result['param-set-' + str(param_set)] = result
+                param_set += 1
+
+        return analysis_result
+
+    def evaluate_knn_singleprocessing(self, X_train, y_train, X_val, y_val):
+        """
+
+        :param X_train:
+        :param y_train:
+        :param X_val:
+        :param y_val:
+        :return:
+        """
+        params = self._generate_params(X_train, y_train, X_val, y_val)
+        analysis_result = {}
+
+        param_set = 1
+        for param in params:
+            result = self.evaluate_knn(param)
+            analysis_result['param-set-' + str(param_set)] = result
+            param_set += 1
+
+        return analysis_result
+
+    def _generate_params(self, X_train, y_train, X_val, y_val):
+        """
+
+        :param X_train:
+        :param y_train:
+        :param X_val:
+        :param y_val:
+        :return:
+        """
+        return [(X_train, y_train, X_val, y_val) + p_tuple
+                for p_tuple in
+                itertools.product(self.neighbors, self.weights, self.algorithms, self.leaf_size, self.p)]
+
+    def evaluate_knn_grid_search(self, X_train, y_train, X_val, y_val):
+        """
+        Not using grid search at this point. It might be useful though in the future. So keeping it for now.
         :param X_train:
         :param y_train:
         :param X_val:
@@ -136,67 +249,3 @@ class KNearestNeighbors(MLModel):
         best_model = halving_grid_search.best_estimator_
         score = halving_grid_search.best_score_
         print(halving_grid_search.cv_results_)
-
-    def evaluate_knn(self, param):
-        """
-
-        :param param:
-        :return:
-        """
-
-        X_train, y_train, X_val, y_val, k_neighbors, weight, algorithm, leaf_size, p = param
-
-        knn_model = KNeighborsClassifier(n_neighbors=k_neighbors,
-                                         weights=weight,
-                                         algorithm=algorithm,
-                                         leaf_size=leaf_size,
-                                         p=p)
-
-        knn_model.fit(X_train, y_train)
-        score = self._learning_curve(knn_model, X_train, y_train, X_val, y_val) # knn_model.score(X_val, y_val)
-        evaluation = [k_neighbors, weight, algorithm, leaf_size, p, str(round(score * 100, 2)) + '%']
-        # print(evaluation)
-        return evaluation
-
-    def evaluate_knn_multiprocessing(self, X_train, y_train, X_val, y_val):
-        """
-
-        :param X_train:
-        :param y_train:
-        :param X_val:
-        :param y_val:
-        :return:
-        """
-        params = self._generate_params(X_train, y_train, X_val, y_val)
-
-        with concurrent.futures.ProcessPoolExecutor() as executor:
-            results = executor.map(self.evaluate_knn, params)
-            # for result in results:
-            #     print(result)
-
-    def evaluate_knn_singleprocessing(self, X_train, y_train, X_val, y_val):
-        """
-
-        :param X_train:
-        :param y_train:
-        :param X_val:
-        :param y_val:
-        :return:
-        """
-        params = self._generate_params(X_train, y_train, X_val, y_val)
-
-        for param in params:
-            self.evaluate_knn(param)
-
-    def _generate_params(self, X_train, y_train, X_val, y_val):
-        """
-
-        :param X_train:
-        :param y_train:
-        :param X_val:
-        :param y_val:
-        :return:
-        """
-        return [(X_train, y_train, X_val, y_val) + p_tuple
-                for p_tuple in
-                itertools.product(self.neighbors, self.weights, self.algorithms, self.leaf_size, self.p)]
