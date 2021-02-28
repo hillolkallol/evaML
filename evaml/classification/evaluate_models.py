@@ -64,10 +64,20 @@ def evaluate(X_train=None,
     X, X_val, y, y_val = train_test_split(X_train, y_train, test_size=.2, random_state=42)
 
     for classifier in __classifiers_list__:
+        # start = time.time()
+        # scores = classifier.evaluate_knn_multiprocessing(X, y, X_val, y_val)
+        # end = time.time()
+        # print("Multiprocessing time taken: ", end - start)
+        #
+        # start = time.time()
+        # scores = classifier.evaluate_knn_singleprocessing(X, y, X_val, y_val)
+        # end = time.time()
+        # print("Singleprocessing time taken: ", end - start)
+
         start = time.time()
         scores = classifier.evaluate_knn_multiprocessing(X, y, X_val, y_val)
         end = time.time()
-        print("MP time taken: ", end - start)
+        print("Numba time taken: ", end - start)
 
         evaluation_metrics.append(scores)
 

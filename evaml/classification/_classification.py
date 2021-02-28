@@ -31,6 +31,7 @@ from sklearn.experimental import enable_halving_search_cv
 from sklearn.model_selection import HalvingGridSearchCV
 import concurrent.futures
 import itertools
+import numpy as np
 
 
 class MLModel:
@@ -54,7 +55,7 @@ class MLModel:
 
         return HalvingGridSearchCV(model, param_grid).fit(X, y)
 
-    def _learning_curve(self, model, X_train, y_train, X_val, y_val):
+    def _generate_evaluation_metrics(self, model, X_train, y_train, X_val, y_val):
         """
 
         :param model:
@@ -64,25 +65,36 @@ class MLModel:
         :param y_val:
         :return:
         """
+        metrics_analysis = {'train_accuracy': [],
+                              'val_accuracy': [],
+                              'precision': [],
+                              'recall': [],
+                              'f-score': [],
+                              'confusion-matrix': []}
+
         start = self._START_DATA_SIZE
         end = len(y_train)
         increment = int((end * self._INCREMENT_RATE) / 100)
-        train_scores = []
-        val_scores = []
 
         for data_size in range(start, end, increment):
             model.fit(X_train[:data_size, :], y_train[:data_size])
 
-            train_score = model.score(X_train[:data_size, :], y_train[:data_size])
-            val_score = model.score(X_val, y_val)
+            train_accuracy = self._calculate_accuracy(model, X_train, y_train, data_size)
+            metrics_analysis['train_accuracy'].append(train_accuracy)
 
-            train_scores.append(train_score)
-            val_scores.append(val_score)
+            val_accuracy = self._calculate_accuracy(model, X_val, y_val, len(y_val))
+            metrics_analysis['val_accuracy'].append(val_accuracy)
 
-            # print(data_size, train_score, val_score)
+        return metrics_analysis
 
-        # pass the scores to visualize the learning curve and store it in the disk
-        return val_scores[-1]
+    def _calculate_accuracy(self, model, X, y, data_size):
+        return model.score(X[:data_size, :], y[:data_size])
+
+    def _calculate_precision_recall_fscore(self):
+        pass
+
+    def _generate_confusion_matrix(self):
+        pass
 
 
 class KNearestNeighbors(MLModel):
@@ -116,34 +128,12 @@ class KNearestNeighbors(MLModel):
         self.leaf_size = [leaf_size for leaf_size in range(min_leaf_size, max_leaf_size+1)]
         self.p = [p for p in range(min_p, max_p+1)]
 
-    def evaluate_knn_grid_search(self, X_train, y_train, X_val, y_val):
-        """
-
-        :param X_train:
-        :param y_train:
-        :param X_val:
-        :param y_val:
-        :return:
-        """
-        knn_model = KNeighborsClassifier()
-        param_grid = {'n_neighbors' : self.neighbors,
-                     'weights' : self.weights,
-                     'algorithm' : self.algorithms,
-                     'leaf_size' : self.leaf_size,
-                     'p' : self.p}
-
-        halving_grid_search = self._grid_search(knn_model, param_grid, X_train, y_train)
-        best_model = halving_grid_search.best_estimator_
-        score = halving_grid_search.best_score_
-        print(halving_grid_search.cv_results_)
-
     def evaluate_knn(self, param):
         """
 
         :param param:
         :return:
         """
-
         X_train, y_train, X_val, y_val, k_neighbors, weight, algorithm, leaf_size, p = param
 
         knn_model = KNeighborsClassifier(n_neighbors=k_neighbors,
@@ -151,12 +141,12 @@ class KNearestNeighbors(MLModel):
                                          algorithm=algorithm,
                                          leaf_size=leaf_size,
                                          p=p)
+        evaluation_metrics = {'metrics_analysis': []}
 
-        knn_model.fit(X_train, y_train)
-        score = self._learning_curve(knn_model, X_train, y_train, X_val, y_val) # knn_model.score(X_val, y_val)
-        evaluation = [k_neighbors, weight, algorithm, leaf_size, p, str(round(score * 100, 2)) + '%']
-        # print(evaluation)
-        return evaluation
+        metrics_analysis = self._generate_evaluation_metrics(knn_model, X_train, y_train, X_val, y_val)
+        evaluation_metrics['metrics_analysis'].append(metrics_analysis)
+        
+        return evaluation_metrics
 
     def evaluate_knn_multiprocessing(self, X_train, y_train, X_val, y_val):
         """
@@ -216,3 +206,24 @@ class KNearestNeighbors(MLModel):
         return [(X_train, y_train, X_val, y_val) + p_tuple
                 for p_tuple in
                 itertools.product(self.neighbors, self.weights, self.algorithms, self.leaf_size, self.p)]
+
+    def evaluate_knn_grid_search(self, X_train, y_train, X_val, y_val):
+        """
+        Not using grid search at this point. It might be useful though in the future. So keeping it for now.
+        :param X_train:
+        :param y_train:
+        :param X_val:
+        :param y_val:
+        :return:
+        """
+        knn_model = KNeighborsClassifier()
+        param_grid = {'n_neighbors' : self.neighbors,
+                     'weights' : self.weights,
+                     'algorithm' : self.algorithms,
+                     'leaf_size' : self.leaf_size,
+                     'p' : self.p}
+
+        halving_grid_search = self._grid_search(knn_model, param_grid, X_train, y_train)
+        best_model = halving_grid_search.best_estimator_
+        score = halving_grid_search.best_score_
+        print(halving_grid_search.cv_results_)
