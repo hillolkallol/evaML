@@ -31,7 +31,8 @@ from sklearn.experimental import enable_halving_search_cv
 from sklearn.model_selection import HalvingGridSearchCV
 import concurrent.futures
 import itertools
-import numpy as np
+from sklearn.metrics import classification_report
+from sklearn.metrics import confusion_matrix
 
 
 class MLModel:
@@ -39,7 +40,6 @@ class MLModel:
 
     :argument
     """
-
     _START_DATA_SIZE = 25
     _INCREMENT_RATE = 5
 
@@ -65,12 +65,7 @@ class MLModel:
         :param y_val:
         :return:
         """
-        metrics_analysis = {'train_accuracy': [],
-                              'val_accuracy': [],
-                              'precision': [],
-                              'recall': [],
-                              'f-score': [],
-                              'confusion-matrix': []}
+        metrics_analysis = {}
 
         start = self._START_DATA_SIZE
         end = len(y_train)
@@ -78,23 +73,26 @@ class MLModel:
 
         for data_size in range(start, end, increment):
             model.fit(X_train[:data_size, :], y_train[:data_size])
+            y_pred = model.predict(X_val)
 
-            train_accuracy = self._calculate_accuracy(model, X_train, y_train, data_size)
-            metrics_analysis['train_accuracy'].append(train_accuracy)
+            classification_report = self._classification_report(y_val, y_pred)
+            confusion_matrix = self._generate_confusion_matrix(y_val, y_pred)
 
-            val_accuracy = self._calculate_accuracy(model, X_val, y_val, len(y_val))
-            metrics_analysis['val_accuracy'].append(val_accuracy)
+            analysis = {'classification-report' : classification_report,
+                        'confusion-matrix' : confusion_matrix}
+
+            metrics_analysis['data-size-' + str(data_size)] = analysis
 
         return metrics_analysis
 
     def _calculate_accuracy(self, model, X, y, data_size):
         return model.score(X[:data_size, :], y[:data_size])
 
-    def _calculate_precision_recall_fscore(self):
-        pass
+    def _classification_report(self, y_true, y_pred):
+        return classification_report(y_true, y_pred)
 
-    def _generate_confusion_matrix(self):
-        pass
+    def _generate_confusion_matrix(self, y_true, y_pred):
+        return confusion_matrix(y_true, y_pred)
 
 
 class KNearestNeighbors(MLModel):
@@ -141,11 +139,17 @@ class KNearestNeighbors(MLModel):
                                          algorithm=algorithm,
                                          leaf_size=leaf_size,
                                          p=p)
-        evaluation_metrics = {'metrics_analysis': []}
+        evaluation_metrics = {}
 
         metrics_analysis = self._generate_evaluation_metrics(knn_model, X_train, y_train, X_val, y_val)
-        evaluation_metrics['metrics_analysis'].append(metrics_analysis)
-        
+
+        evaluation_metrics['neighbors'] = k_neighbors
+        evaluation_metrics['weight'] = weight
+        evaluation_metrics['algorithm'] = algorithm
+        evaluation_metrics['leaf-size'] = leaf_size
+        evaluation_metrics['p'] = p
+        evaluation_metrics['metrics_analysis'] = metrics_analysis
+
         return evaluation_metrics
 
     def evaluate_knn_multiprocessing(self, X_train, y_train, X_val, y_val):
@@ -158,11 +162,17 @@ class KNearestNeighbors(MLModel):
         :return:
         """
         params = self._generate_params(X_train, y_train, X_val, y_val)
+        analysis_result = {}
 
         with concurrent.futures.ProcessPoolExecutor() as executor:
             results = executor.map(self.evaluate_knn, params)
-            # for result in results:
-            #     print(result)
+
+            param_set = 1
+            for result in results:
+                analysis_result['param-set-' + str(param_set)] = result
+                param_set += 1
+
+        return analysis_result
 
     def evaluate_knn_multithreading(self, X_train, y_train, X_val, y_val):
         """
@@ -174,11 +184,17 @@ class KNearestNeighbors(MLModel):
         :return:
         """
         params = self._generate_params(X_train, y_train, X_val, y_val)
+        analysis_result = {}
 
         with concurrent.futures.ThreadPoolExecutor() as executor:
             results = executor.map(self.evaluate_knn, params)
-            # for result in results:
-            #     print(result)
+
+            param_set = 1
+            for result in results:
+                analysis_result['param-set-' + str(param_set)] = result
+                param_set += 1
+
+        return analysis_result
 
     def evaluate_knn_singleprocessing(self, X_train, y_train, X_val, y_val):
         """
@@ -190,9 +206,15 @@ class KNearestNeighbors(MLModel):
         :return:
         """
         params = self._generate_params(X_train, y_train, X_val, y_val)
+        analysis_result = {}
 
+        param_set = 1
         for param in params:
-            self.evaluate_knn(param)
+            result = self.evaluate_knn(param)
+            analysis_result['param-set-' + str(param_set)] = result
+            param_set += 1
+
+        return analysis_result
 
     def _generate_params(self, X_train, y_train, X_val, y_val):
         """
