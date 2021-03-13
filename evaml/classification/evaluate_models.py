@@ -28,7 +28,9 @@
 
 from sklearn.model_selection import train_test_split
 from evaml.classification import KNearestNeighbors
+import json
 import time
+import os
 
 __classifiers_list__ = [KNearestNeighbors()]
 
@@ -38,6 +40,7 @@ def evaluate(X_train=None,
              y_test=None,
              classifiers=__classifiers_list__,
              evaluation_size='big',
+             directory='evaluation',
              n_jobs=10):
     """
 
@@ -61,20 +64,25 @@ def evaluate(X_train=None,
         print("time taken: ", end - start)
 
         evaluation_metrics_all_models[classifier.__class__.__name__] = evaluation_metrics
-        generate_full_report(evaluation_metrics_all_models)
+
+        create_directories(directory)
+        save_result_to_file(evaluation_metrics_all_models, directory)
 
     return evaluation_metrics_all_models
+
+def create_directories(directory):
+    create_directory(directory)
+    create_directory(directory + '/learning_curves')
+
+def create_directory(directory):
+    if not os.path.exists(directory):
+        os.makedirs(directory)
 
 def generate_summary(evaluation_metrics_all_models):
     pass
 
-def generate_full_report(evaluation_metrics_all_models):
-    # print("{:<10} {:<10} {:<10}".format('NAME', 'AGE', 'COURSE'))
+def save_result_to_file(evaluation_metrics_all_models, directory):
+    with open(directory + '/report.json', 'w') as f:
+        json.dump(evaluation_metrics_all_models, f, indent=4)
 
-    # print each data item.
-    for classifer, classiferval in evaluation_metrics_all_models.items():
-        for paramset, paramval in classiferval.items():
-            neighbors, weight, algorithm, leaf_size, p, _ = paramval
-            print("{:<10} {:<10} {:<10} {:<10} {:<10} {:<10} {:<10}".format(classifer,
-                                                    paramset,
-                                                    neighbors, weight, algorithm, leaf_size, p))
+    return json.dumps(evaluation_metrics_all_models, indent=4)

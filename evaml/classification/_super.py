@@ -72,10 +72,10 @@ class MLModel:
             y_pred = model.predict(X_val)
 
             classification_report = self._classification_report(y_val, y_pred)
-            confusion_matrix = self._generate_confusion_matrix(y_val, y_pred)
+            # confusion_matrix = self._generate_confusion_matrix(y_val, y_pred)
 
-            analysis = {'classification-report' : classification_report,
-                        'confusion-matrix' : confusion_matrix}
+            analysis = {'classification-report' : classification_report}
+                        # 'confusion-matrix' : confusion_matrix}
 
             metrics_analysis['data-size-' + str(data_size)] = analysis
 
@@ -85,7 +85,7 @@ class MLModel:
         return model.score(X[:data_size, :], y[:data_size])
 
     def _classification_report(self, y_true, y_pred):
-        return classification_report(y_true, y_pred)
+        return classification_report(y_true, y_pred, output_dict=True)
 
     def _generate_confusion_matrix(self, y_true, y_pred):
         return confusion_matrix(y_true, y_pred)
