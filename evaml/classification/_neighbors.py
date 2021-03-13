@@ -27,72 +27,9 @@
 """Machine Learning Models"""
 
 from sklearn.neighbors import KNeighborsClassifier
-from sklearn.experimental import enable_halving_search_cv
-from sklearn.model_selection import HalvingGridSearchCV
 import concurrent.futures
 import itertools
-from sklearn.metrics import classification_report
-from sklearn.metrics import confusion_matrix
-
-
-class MLModel:
-    """
-
-    :argument
-    """
-    _START_DATA_SIZE = 25
-    _INCREMENT_RATE = 5
-
-    def _grid_search(self, model, param_grid, X, y):
-        """
-
-        :param model:
-        :param param_grid:
-        :param X:
-        :param y:
-        :return:
-        """
-
-        return HalvingGridSearchCV(model, param_grid).fit(X, y)
-
-    def _generate_evaluation_metrics(self, model, X_train, y_train, X_val, y_val):
-        """
-
-        :param model:
-        :param X_train:
-        :param y_train:
-        :param X_val:
-        :param y_val:
-        :return:
-        """
-        metrics_analysis = {}
-
-        start = self._START_DATA_SIZE
-        end = len(y_train)
-        increment = int((end * self._INCREMENT_RATE) / 100)
-
-        for data_size in range(start, end, increment):
-            model.fit(X_train[:data_size, :], y_train[:data_size])
-            y_pred = model.predict(X_val)
-
-            classification_report = self._classification_report(y_val, y_pred)
-            confusion_matrix = self._generate_confusion_matrix(y_val, y_pred)
-
-            analysis = {'classification-report' : classification_report,
-                        'confusion-matrix' : confusion_matrix}
-
-            metrics_analysis['data-size-' + str(data_size)] = analysis
-
-        return metrics_analysis
-
-    def _calculate_accuracy(self, model, X, y, data_size):
-        return model.score(X[:data_size, :], y[:data_size])
-
-    def _classification_report(self, y_true, y_pred):
-        return classification_report(y_true, y_pred)
-
-    def _generate_confusion_matrix(self, y_true, y_pred):
-        return confusion_matrix(y_true, y_pred)
+from ._super import MLModel
 
 
 class KNearestNeighbors(MLModel):
@@ -101,14 +38,14 @@ class KNearestNeighbors(MLModel):
     :argument
     """
     def __init__(self,
-                 min_neighbors=5,
-                 max_neighbors=21,
+                 min_neighbors=7,
+                 max_neighbors=10,
                  weights=['uniform', 'distance'],
                  algorithms=['auto', 'ball_tree', 'kd_tree', 'brute'],
-                 min_leaf_size=20,
-                 max_leaf_size=30,
+                 min_leaf_size=25,
+                 max_leaf_size=27,
                  min_p=1,
-                 max_p=5):
+                 max_p=3):
         """
 
         :param min_neighbors:
