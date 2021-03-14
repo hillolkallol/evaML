@@ -26,10 +26,9 @@
 
 """Machine Learning Model Super Class"""
 
-from sklearn.experimental import enable_halving_search_cv
-from sklearn.model_selection import HalvingGridSearchCV
 from sklearn.metrics import classification_report
 from sklearn.metrics import confusion_matrix
+
 
 class MLModel:
     """
@@ -38,18 +37,6 @@ class MLModel:
     """
     _START_DATA_SIZE = 25
     _INCREMENT_RATE = 5
-
-    def _grid_search(self, model, param_grid, X, y):
-        """
-
-        :param model:
-        :param param_grid:
-        :param X:
-        :param y:
-        :return:
-        """
-
-        return HalvingGridSearchCV(model, param_grid).fit(X, y)
 
     def _generate_evaluation_metrics(self, model, X_train, y_train, X_val, y_val):
         """
@@ -74,8 +61,8 @@ class MLModel:
             classification_report = self._classification_report(y_val, y_pred)
             # confusion_matrix = self._generate_confusion_matrix(y_val, y_pred)
 
-            analysis = {'classification-report' : classification_report}
-                        # 'confusion-matrix' : confusion_matrix}
+            analysis = {'classification-report': classification_report}
+                        # 'confusion-matrix': confusion_matrix}
 
             metrics_analysis['data-size-' + str(data_size)] = analysis
 

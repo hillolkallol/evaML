@@ -12,4 +12,3 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=.2, random_s
 if __name__ == '__main__':
     evaluation_metrics_all_models = evaluate(X_train, y_train, X_test, y_test)
     # print(evaluation_metrics_all_models)
-

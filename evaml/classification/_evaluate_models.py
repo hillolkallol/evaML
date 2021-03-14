@@ -34,12 +34,12 @@ import os
 
 __classifiers_list__ = (KNearestNeighbors(),)
 
+
 def evaluate(X_train=None,
              y_train=None,
              X_test=None,
              y_test=None,
              classifiers=__classifiers_list__,
-             evaluation_size='big',
              directory='evaluation'):
     """
 
@@ -48,14 +48,13 @@ def evaluate(X_train=None,
     :param X_test:
     :param y_test:
     :param classifiers:
-    :param evaluation_size:
-    :param n_jobs:
+    :param directory:
     :return:
     """
     evaluation_metrics_all_models = {}
     X, X_val, y, y_val = train_test_split(X_train, y_train, test_size=.2, random_state=42)
 
-    for classifier in __classifiers_list__:
+    for classifier in classifiers:
 
         start = time.time()
         evaluation_metrics = classifier.evaluate_knn_multiprocessing(X, y, X_val, y_val)
@@ -64,13 +63,14 @@ def evaluate(X_train=None,
 
         evaluation_metrics_all_models[classifier.__class__.__name__] = evaluation_metrics
 
-        __create_directories(directory)
-        __create_report(evaluation_metrics_all_models, directory)
+    __create_directories(directory)
+    return __create_report(evaluation_metrics_all_models, directory)
 
-    return evaluation_metrics_all_models
 
 def __create_report(evaluation_metrics_all_models, directory):
     __create_json_report(evaluation_metrics_all_models, directory)
+    __create_html_report(directory)
+
 
 def __create_json_report(evaluation_metrics_all_models, directory):
     with open(directory + '/report.json', 'w') as f:
@@ -78,16 +78,40 @@ def __create_json_report(evaluation_metrics_all_models, directory):
 
     return json.dumps(evaluation_metrics_all_models, indent=4)
 
-def __create_html_report():
-    pass
+
+def __read_json_report(directory):
+    with open(directory + '/report.json', 'r') as f:
+        json_report = json.load(f)
+
+    return json_report
+
+
+def __create_html_report(directory):
+
+    """
+
+    :param directory:
+    :return:
+    """
+    json_report = __read_json_report(directory)
+
+    html_report = """
+    
+    """
+
+    with open(directory + '/report.html', 'w') as file:
+        file.write(html_report)
+
 
 def __create_directories(directory):
     __create_directory(directory)
     __create_directory(directory + '/learning_curves')
 
+
 def __create_directory(directory):
     if not os.path.exists(directory):
         os.makedirs(directory)
 
-def __generate_summary(evaluation_metrics_all_models):
+
+def __generate_summary():
     pass

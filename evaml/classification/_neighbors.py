@@ -31,6 +31,7 @@ import concurrent.futures
 import itertools
 from ._super import MLModel
 
+
 class KNearestNeighbors(MLModel):
     """
 
@@ -75,7 +76,7 @@ class KNearestNeighbors(MLModel):
                 for p_tuple in
                 itertools.product(self.__NEIGHBORS, self.__WEIGHTS, self.__ALGORITHMS, self.__LEAF_SIZE, self.__P)]
 
-    def __evaluate_knn(self, param):
+    def evaluate_knn(self, param):
         """
 
         :param param:
@@ -114,7 +115,7 @@ class KNearestNeighbors(MLModel):
         analysis_result = {}
 
         with concurrent.futures.ProcessPoolExecutor() as executor:
-            results = executor.map(self.__evaluate_knn, params)
+            results = executor.map(self.evaluate_knn, params)
 
             param_set = 1
             for result in results:
@@ -136,7 +137,7 @@ class KNearestNeighbors(MLModel):
         analysis_result = {}
 
         with concurrent.futures.ThreadPoolExecutor() as executor:
-            results = executor.map(self.__evaluate_knn, params)
+            results = executor.map(self.evaluate_knn, params)
 
             param_set = 1
             for result in results:
@@ -159,7 +160,7 @@ class KNearestNeighbors(MLModel):
 
         param_set = 1
         for param in params:
-            result = self.__evaluate_knn(param)
+            result = self.evaluate_knn(param)
             analysis_result['param-set-' + str(param_set)] = result
             param_set += 1
 
