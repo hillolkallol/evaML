@@ -9,7 +9,7 @@ Industry and University research spend a lot of time on evaluating, comparing an
 evaML is still not available in Python Package Index - pypi, but it still can be used by putting the repository folder in python site-package.
 
 #### Example
-Please note that it is mendatory in windows to keep evaluate() function inside ```python if __name__ == '__main__':``` and also recommended in Linux.
+Please note that it is mendatory in windows to keep evaluate() function inside ```__name__ == '__main__':``` and also recommended in Linux.
 
 ```python
 from sklearn import datasets
