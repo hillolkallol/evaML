@@ -69,6 +69,7 @@ def evaluate(X_train=None,
 
 def __create_report(evaluation_metrics_all_models, directory):
     __create_json_report(evaluation_metrics_all_models, directory)
+    __create_html_report(directory)
 
 
 def __create_json_report(evaluation_metrics_all_models, directory):
@@ -78,8 +79,28 @@ def __create_json_report(evaluation_metrics_all_models, directory):
     return json.dumps(evaluation_metrics_all_models, indent=4)
 
 
-def __create_html_report():
-    pass
+def __read_json_report(directory):
+    with open(directory + '/report.json', 'r') as f:
+        json_report = json.load(f)
+
+    return json_report
+
+
+def __create_html_report(directory):
+
+    """
+
+    :param directory:
+    :return:
+    """
+    json_report = __read_json_report(directory)
+
+    html_report = """
+    
+    """
+
+    with open(directory + '/report.html', 'w') as file:
+        file.write(html_report)
 
 
 def __create_directories(directory):
