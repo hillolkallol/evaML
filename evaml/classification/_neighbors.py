@@ -31,6 +31,7 @@ import concurrent.futures
 import itertools
 from ._super import MLModel
 
+
 class KNearestNeighbors(MLModel):
     """
 
