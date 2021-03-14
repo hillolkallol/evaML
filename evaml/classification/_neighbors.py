@@ -31,7 +31,6 @@ import concurrent.futures
 import itertools
 from ._super import MLModel
 
-
 class KNearestNeighbors(MLModel):
     """
 
@@ -40,8 +39,8 @@ class KNearestNeighbors(MLModel):
     def __init__(self,
                  min_neighbors=7,
                  max_neighbors=10,
-                 weights=['uniform', 'distance'],
-                 algorithms=['auto', 'ball_tree', 'kd_tree', 'brute'],
+                 weights=('uniform', 'distance'),
+                 algorithms=('auto', 'ball_tree', 'kd_tree', 'brute'),
                  min_leaf_size=25,
                  max_leaf_size=27,
                  min_p=1,
@@ -57,13 +56,26 @@ class KNearestNeighbors(MLModel):
         :param min_p:
         :param max_p:
         """
-        self.neighbors = [k_neighbors for k_neighbors in range(min_neighbors, max_neighbors+1, 2)]
-        self.weights = weights
-        self.algorithms = algorithms
-        self.leaf_size = [leaf_size for leaf_size in range(min_leaf_size, max_leaf_size+1)]
-        self.p = [p for p in range(min_p, max_p+1)]
+        self.__NEIGHBORS = [k_neighbors for k_neighbors in range(min_neighbors, max_neighbors+1, 2)]
+        self.__WEIGHTS = weights
+        self.__ALGORITHMS = algorithms
+        self.__LEAF_SIZE = [leaf_size for leaf_size in range(min_leaf_size, max_leaf_size+1)]
+        self.__P = [p for p in range(min_p, max_p+1)]
 
-    def evaluate_knn(self, param):
+    def __generate_params(self, X_train, y_train, X_val, y_val):
+        """
+
+        :param X_train:
+        :param y_train:
+        :param X_val:
+        :param y_val:
+        :return:
+        """
+        return [(X_train, y_train, X_val, y_val) + p_tuple
+                for p_tuple in
+                itertools.product(self.__NEIGHBORS, self.__WEIGHTS, self.__ALGORITHMS, self.__LEAF_SIZE, self.__P)]
+
+    def __evaluate_knn(self, param):
         """
 
         :param param:
@@ -98,11 +110,11 @@ class KNearestNeighbors(MLModel):
         :param y_val:
         :return:
         """
-        params = self._generate_params(X_train, y_train, X_val, y_val)
+        params = self.__generate_params(X_train, y_train, X_val, y_val)
         analysis_result = {}
 
         with concurrent.futures.ProcessPoolExecutor() as executor:
-            results = executor.map(self.evaluate_knn, params)
+            results = executor.map(self.__evaluate_knn, params)
 
             param_set = 1
             for result in results:
@@ -120,11 +132,11 @@ class KNearestNeighbors(MLModel):
         :param y_val:
         :return:
         """
-        params = self._generate_params(X_train, y_train, X_val, y_val)
+        params = self.__generate_params(X_train, y_train, X_val, y_val)
         analysis_result = {}
 
         with concurrent.futures.ThreadPoolExecutor() as executor:
-            results = executor.map(self.evaluate_knn, params)
+            results = executor.map(self.__evaluate_knn, params)
 
             param_set = 1
             for result in results:
@@ -142,47 +154,13 @@ class KNearestNeighbors(MLModel):
         :param y_val:
         :return:
         """
-        params = self._generate_params(X_train, y_train, X_val, y_val)
+        params = self.__generate_params(X_train, y_train, X_val, y_val)
         analysis_result = {}
 
         param_set = 1
         for param in params:
-            result = self.evaluate_knn(param)
+            result = self.__evaluate_knn(param)
             analysis_result['param-set-' + str(param_set)] = result
             param_set += 1
 
         return analysis_result
-
-    def _generate_params(self, X_train, y_train, X_val, y_val):
-        """
-
-        :param X_train:
-        :param y_train:
-        :param X_val:
-        :param y_val:
-        :return:
-        """
-        return [(X_train, y_train, X_val, y_val) + p_tuple
-                for p_tuple in
-                itertools.product(self.neighbors, self.weights, self.algorithms, self.leaf_size, self.p)]
-
-    def evaluate_knn_grid_search(self, X_train, y_train, X_val, y_val):
-        """
-        Not using grid search at this point. It might be useful though in the future. So keeping it for now.
-        :param X_train:
-        :param y_train:
-        :param X_val:
-        :param y_val:
-        :return:
-        """
-        knn_model = KNeighborsClassifier()
-        param_grid = {'n_neighbors' : self.neighbors,
-                     'weights' : self.weights,
-                     'algorithm' : self.algorithms,
-                     'leaf_size' : self.leaf_size,
-                     'p' : self.p}
-
-        halving_grid_search = self._grid_search(knn_model, param_grid, X_train, y_train)
-        best_model = halving_grid_search.best_estimator_
-        score = halving_grid_search.best_score_
-        print(halving_grid_search.cv_results_)

@@ -32,7 +32,7 @@ import json
 import time
 import os
 
-__classifiers_list__ = [KNearestNeighbors()]
+__classifiers_list__ = (KNearestNeighbors(),)
 
 def evaluate(X_train=None,
              y_train=None,
@@ -40,8 +40,7 @@ def evaluate(X_train=None,
              y_test=None,
              classifiers=__classifiers_list__,
              evaluation_size='big',
-             directory='evaluation',
-             n_jobs=10):
+             directory='evaluation'):
     """
 
     :param X_train:
@@ -65,24 +64,30 @@ def evaluate(X_train=None,
 
         evaluation_metrics_all_models[classifier.__class__.__name__] = evaluation_metrics
 
-        create_directories(directory)
-        save_result_to_file(evaluation_metrics_all_models, directory)
+        __create_directories(directory)
+        __create_report(evaluation_metrics_all_models, directory)
 
     return evaluation_metrics_all_models
 
-def create_directories(directory):
-    create_directory(directory)
-    create_directory(directory + '/learning_curves')
+def __create_report(evaluation_metrics_all_models, directory):
+    __create_json_report(evaluation_metrics_all_models, directory)
 
-def create_directory(directory):
-    if not os.path.exists(directory):
-        os.makedirs(directory)
-
-def generate_summary(evaluation_metrics_all_models):
-    pass
-
-def save_result_to_file(evaluation_metrics_all_models, directory):
+def __create_json_report(evaluation_metrics_all_models, directory):
     with open(directory + '/report.json', 'w') as f:
         json.dump(evaluation_metrics_all_models, f, indent=4)
 
     return json.dumps(evaluation_metrics_all_models, indent=4)
+
+def __create_html_report():
+    pass
+
+def __create_directories(directory):
+    __create_directory(directory)
+    __create_directory(directory + '/learning_curves')
+
+def __create_directory(directory):
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+
+def __generate_summary(evaluation_metrics_all_models):
+    pass
