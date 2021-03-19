@@ -63,7 +63,7 @@ class KNearestNeighbors(MLModel):
         self.__LEAF_SIZE = [leaf_size for leaf_size in range(min_leaf_size, max_leaf_size+1)]
         self.__P = [p for p in range(min_p, max_p+1)]
 
-    def __generate_params(self, X_train, y_train, X_val, y_val):
+    def __generate_params(self, X_train, y_train, X_val, y_val, X_test, y_test):
         """
 
         :param X_train:
@@ -72,7 +72,7 @@ class KNearestNeighbors(MLModel):
         :param y_val:
         :return:
         """
-        return [(X_train, y_train, X_val, y_val) + p_tuple
+        return [(X_train, y_train, X_val, y_val, X_test, y_test) + p_tuple
                 for p_tuple in
                 itertools.product(self.__NEIGHBORS, self.__WEIGHTS, self.__ALGORITHMS, self.__LEAF_SIZE, self.__P)]
 
@@ -82,27 +82,36 @@ class KNearestNeighbors(MLModel):
         :param param:
         :return:
         """
-        X_train, y_train, X_val, y_val, k_neighbors, weight, algorithm, leaf_size, p = param
+        X_train, y_train, X_val, y_val, X_test, y_test, k_neighbors, weight, algorithm, leaf_size, p = param
 
         knn_model = KNeighborsClassifier(n_neighbors=k_neighbors,
                                          weights=weight,
                                          algorithm=algorithm,
                                          leaf_size=leaf_size,
                                          p=p)
-        evaluation_metrics = {}
+        params = {}
+        results = {}
 
-        metrics_analysis = self._generate_evaluation_metrics(knn_model, X_train, y_train, X_val, y_val)
+        precision, recall, fscore, support, accuracy, learning_curve_data = self._generate_evaluation_metrics(
+            knn_model, X_train, y_train, X_val, y_val, X_test, y_test)
 
-        evaluation_metrics['neighbors'] = k_neighbors
-        evaluation_metrics['weight'] = weight
-        evaluation_metrics['algorithm'] = algorithm
-        evaluation_metrics['leaf-size'] = leaf_size
-        evaluation_metrics['p'] = p
-        evaluation_metrics['metrics_analysis'] = metrics_analysis
+        params['neighbors'] = k_neighbors
+        params['weight'] = weight
+        params['algorithm'] = algorithm
+        params['leaf-size'] = leaf_size
+        params['p'] = p
 
-        return evaluation_metrics
+        results['precision'] = precision
+        results['recall'] = recall
+        results['f-score'] = fscore
+        results['accuracy'] = accuracy
 
-    def evaluate_knn_multiprocessing(self, X_train, y_train, X_val, y_val):
+        learning_curve_plot_name = "learning_curve_" + str(k_neighbors) + "_" \
+                                   + str(weight) + "_" + str(algorithm) + "_" + str(leaf_size) + "_" + str(p)
+
+        return params, results, learning_curve_data, learning_curve_plot_name
+
+    def evaluate_knn_multiprocessing(self, X_train, y_train, X_val, y_val, X_test, y_test):
         """
 
         :param X_train:
@@ -111,57 +120,24 @@ class KNearestNeighbors(MLModel):
         :param y_val:
         :return:
         """
-        params = self.__generate_params(X_train, y_train, X_val, y_val)
-        analysis_result = {}
+        params = self.__generate_params(X_train, y_train, X_val, y_val, X_test, y_test)
+        evaluation_metrics = {}
+        learning_curve_data_all = {}
 
         with concurrent.futures.ProcessPoolExecutor() as executor:
-            results = executor.map(self.evaluate_knn, params)
+            output = executor.map(self.evaluate_knn, params)
 
             param_set = 1
-            for result in results:
-                analysis_result['param-set-' + str(param_set)] = result
+            for params, results, learning_curve_data, learning_curve_plot_name in output:
+
+                param_result_set = {}
+                param_result_set['params'] = params
+                param_result_set['results'] = results
+                param_result_set['learning_curve_plot_name'] = learning_curve_plot_name
+
+                learning_curve_data_all[learning_curve_plot_name] = learning_curve_data
+
+                evaluation_metrics['param-set-' + str(param_set)] = param_result_set
                 param_set += 1
 
-        return analysis_result
-
-    def evaluate_knn_multithreading(self, X_train, y_train, X_val, y_val):
-        """
-
-        :param X_train:
-        :param y_train:
-        :param X_val:
-        :param y_val:
-        :return:
-        """
-        params = self.__generate_params(X_train, y_train, X_val, y_val)
-        analysis_result = {}
-
-        with concurrent.futures.ThreadPoolExecutor() as executor:
-            results = executor.map(self.evaluate_knn, params)
-
-            param_set = 1
-            for result in results:
-                analysis_result['param-set-' + str(param_set)] = result
-                param_set += 1
-
-        return analysis_result
-
-    def evaluate_knn_singleprocessing(self, X_train, y_train, X_val, y_val):
-        """
-
-        :param X_train:
-        :param y_train:
-        :param X_val:
-        :param y_val:
-        :return:
-        """
-        params = self.__generate_params(X_train, y_train, X_val, y_val)
-        analysis_result = {}
-
-        param_set = 1
-        for param in params:
-            result = self.evaluate_knn(param)
-            analysis_result['param-set-' + str(param_set)] = result
-            param_set += 1
-
-        return analysis_result
+        return evaluation_metrics, learning_curve_data_all

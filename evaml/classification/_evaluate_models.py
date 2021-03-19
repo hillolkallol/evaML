@@ -28,9 +28,30 @@
 
 from sklearn.model_selection import train_test_split
 from evaml.classification import KNearestNeighbors
+import logging
 import json
 import time
 import os
+
+####################################
+# Will separate the logger later
+# create logger
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
+# create console handler and set level to debug
+ch = logging.StreamHandler()
+ch.setLevel(logging.INFO)
+
+# create formatter
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+
+# add formatter to ch
+ch.setFormatter(formatter)
+
+# add ch to logger
+logger.addHandler(ch)
+###################################
 
 __classifiers_list__ = (KNearestNeighbors(),)
 
@@ -57,9 +78,10 @@ def evaluate(X_train=None,
     for classifier in classifiers:
 
         start = time.time()
-        evaluation_metrics = classifier.evaluate_knn_multiprocessing(X, y, X_val, y_val)
+        evaluation_metrics, learning_curve_data_all = classifier.evaluate_knn_multiprocessing(X, y, X_val, y_val, X_test, y_test)
         end = time.time()
-        print("time taken: ", end - start)
+        logger.info(classifier.__class__.__name__ + " - time taken: " + str(round(end - start, 2)))
+        # print(classifier.__class__.__name__ + " - time taken: ", round(end - start, 2))
 
         evaluation_metrics_all_models[classifier.__class__.__name__] = evaluation_metrics
 

@@ -28,7 +28,8 @@
 
 from sklearn.metrics import classification_report
 from sklearn.metrics import confusion_matrix
-
+from sklearn.metrics import precision_recall_fscore_support
+from sklearn.metrics import accuracy_score
 
 class MLModel:
     """
@@ -38,7 +39,7 @@ class MLModel:
     _START_DATA_SIZE = 25
     _INCREMENT_RATE = 5
 
-    def _generate_evaluation_metrics(self, model, X_train, y_train, X_val, y_val):
+    def _generate_evaluation_metrics(self, model, X_train, y_train, X_val, y_val, X_test, y_test):
         """
 
         :param model:
@@ -48,7 +49,7 @@ class MLModel:
         :param y_val:
         :return:
         """
-        metrics_analysis = {}
+        learning_curve_data = []
 
         start = self._START_DATA_SIZE
         end = len(y_train)
@@ -56,20 +57,24 @@ class MLModel:
 
         for data_size in range(start, end, increment):
             model.fit(X_train[:data_size, :], y_train[:data_size])
-            y_pred = model.predict(X_val)
+            train_accuracy = self._calculate_accuracy(model, X_train[:data_size, :], y_train[:data_size])
+            val_accuracy = self._calculate_accuracy(model, X_val, y_val)
 
-            classification_report = self._classification_report(y_val, y_pred)
-            # confusion_matrix = self._generate_confusion_matrix(y_val, y_pred)
+            learning_curve_data.append([data_size, round(train_accuracy, 2), round(val_accuracy, 2)])
 
-            analysis = {'classification-report': classification_report}
-                        # 'confusion-matrix': confusion_matrix}
+        precision, recall, fscore, support, accuracy = self._precision_recall_fscore_support_accuracy(model, X_train, y_train, X_test, y_test)
+        return precision, recall, fscore, support, accuracy, learning_curve_data
 
-            metrics_analysis['data-size-' + str(data_size)] = analysis
+    def _precision_recall_fscore_support_accuracy(self, model, X_train, y_train, X_test, y_test):
+        model.fit(X_train, y_train)
+        y_pred = model.predict(X_test)
+        precision, recall, fscore, support = precision_recall_fscore_support(y_test, y_pred, average='weighted')
+        accuracy = self._calculate_accuracy(model, X_test, y_test)
 
-        return metrics_analysis
+        return round(precision, 2), round(recall, 2), round(fscore, 2), support, round(accuracy, 2)
 
-    def _calculate_accuracy(self, model, X, y, data_size):
-        return model.score(X[:data_size, :], y[:data_size])
+    def _calculate_accuracy(self, model, X, y):
+        return model.score(X, y)
 
     def _classification_report(self, y_true, y_pred):
         return classification_report(y_true, y_pred, output_dict=True)
