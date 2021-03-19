@@ -72,6 +72,7 @@ def evaluate(X_train=None,
     :param directory:
     :return:
     """
+    __create_directories(directory)
     evaluation_metrics_all_models = {}
     X, X_val, y, y_val = train_test_split(X_train, y_train, test_size=.2, random_state=42)
 
@@ -80,13 +81,22 @@ def evaluate(X_train=None,
         start = time.time()
         evaluation_metrics, learning_curve_data_all = classifier.evaluate_knn_multiprocessing(X, y, X_val, y_val, X_test, y_test)
         end = time.time()
-        logger.info(classifier.__class__.__name__ + " - time taken: " + str(round(end - start, 2)))
-        # print(classifier.__class__.__name__ + " - time taken: ", round(end - start, 2))
+        logger.info(classifier.__class__.__name__ + " >>> Time taken: " + str(round(end - start, 2)))
 
+        __plot_learning_curves(learning_curve_data_all, directory)
         evaluation_metrics_all_models[classifier.__class__.__name__] = evaluation_metrics
 
-    __create_directories(directory)
     return __create_report(evaluation_metrics_all_models, directory)
+
+
+def __plot_learning_curves(learning_curve_data_all, directory):
+    for learning_curve_data_name in learning_curve_data_all:
+        # print(learning_curve_data_name)
+        __plot_learning_curve(learning_curve_data_all[learning_curve_data_name])
+
+
+def __plot_learning_curve(learning_curve_data):
+    pass
 
 
 def __create_report(evaluation_metrics_all_models, directory):
