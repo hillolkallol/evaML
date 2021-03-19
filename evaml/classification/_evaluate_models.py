@@ -28,6 +28,8 @@
 
 from sklearn.model_selection import train_test_split
 from evaml.classification import KNearestNeighbors
+import matplotlib.pyplot as plt
+import numpy as np
 import logging
 import json
 import time
@@ -92,11 +94,22 @@ def evaluate(X_train=None,
 def __plot_learning_curves(learning_curve_data_all, directory):
     for learning_curve_data_name in learning_curve_data_all:
         # print(learning_curve_data_name)
-        __plot_learning_curve(learning_curve_data_all[learning_curve_data_name])
+        __plot_learning_curve(np.array(learning_curve_data_all[learning_curve_data_name]), learning_curve_data_name, directory)
 
 
-def __plot_learning_curve(learning_curve_data):
-    pass
+def __plot_learning_curve(learning_curve_data, learning_curve_data_name, directory):
+
+    datasize = learning_curve_data[:, 0]
+    train_accuracy = learning_curve_data[:, 1]
+    val_accuracy = learning_curve_data[:, 2]
+
+    fig, ax = plt.subplots()
+
+    line1, = ax.plot(datasize, train_accuracy, label='Training Set Accuracy')
+    line2, = ax.plot(datasize, val_accuracy, label='Validation Set Accuracy')
+
+    ax.legend()
+    plt.savefig(directory + '/learning_curves/' + learning_curve_data_name)
 
 
 def __create_report(evaluation_metrics_all_models, directory):

@@ -27,6 +27,7 @@
 """Machine Learning Models"""
 
 from sklearn.neighbors import KNeighborsClassifier
+import numpy as np
 import concurrent.futures
 import itertools
 from ._super import MLModel
