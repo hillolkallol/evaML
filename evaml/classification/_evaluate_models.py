@@ -28,9 +28,30 @@
 
 from sklearn.model_selection import train_test_split
 from evaml.classification import KNearestNeighbors
+import logging
 import json
 import time
 import os
+
+####################################
+# Will separate the logger later
+# create logger
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
+# create console handler and set level to debug
+ch = logging.StreamHandler()
+ch.setLevel(logging.INFO)
+
+# create formatter
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+
+# add formatter to ch
+ch.setFormatter(formatter)
+
+# add ch to logger
+logger.addHandler(ch)
+###################################
 
 __classifiers_list__ = (KNearestNeighbors(),)
 
@@ -51,20 +72,31 @@ def evaluate(X_train=None,
     :param directory:
     :return:
     """
+    __create_directories(directory)
     evaluation_metrics_all_models = {}
     X, X_val, y, y_val = train_test_split(X_train, y_train, test_size=.2, random_state=42)
 
     for classifier in classifiers:
 
         start = time.time()
-        evaluation_metrics = classifier.evaluate_knn_multiprocessing(X, y, X_val, y_val)
+        evaluation_metrics, learning_curve_data_all = classifier.evaluate_knn_multiprocessing(X, y, X_val, y_val, X_test, y_test)
         end = time.time()
-        print("time taken: ", end - start)
+        logger.info(classifier.__class__.__name__ + " >>> Time taken: " + str(round(end - start, 2)))
 
+        __plot_learning_curves(learning_curve_data_all, directory)
         evaluation_metrics_all_models[classifier.__class__.__name__] = evaluation_metrics
 
-    __create_directories(directory)
     return __create_report(evaluation_metrics_all_models, directory)
+
+
+def __plot_learning_curves(learning_curve_data_all, directory):
+    for learning_curve_data_name in learning_curve_data_all:
+        # print(learning_curve_data_name)
+        __plot_learning_curve(learning_curve_data_all[learning_curve_data_name])
+
+
+def __plot_learning_curve(learning_curve_data):
+    pass
 
 
 def __create_report(evaluation_metrics_all_models, directory):
