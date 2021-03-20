@@ -110,6 +110,7 @@ def __plot_learning_curve(learning_curve_data, learning_curve_data_name, directo
 
     ax.legend()
     plt.savefig(directory + '/learning_curves/' + learning_curve_data_name)
+    plt.close(fig)
 
 
 def __create_report(evaluation_metrics_all_models, directory):
@@ -140,10 +141,95 @@ def __create_html_report(directory):
     """
     json_report = __read_json_report(directory)
 
-    html_report = """
+    html_start = """
+    <!doctype html>
+    <html lang="en">
+      <head>
+        <meta charset="utf-8">
+        <title>evaML - Evaluation Report</title>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+      </head>
     
+      <body>
+        <div class="container-fluid">
+          <div class="row">
+            <main role="main" class="col-lg-12 px-4">
+              <h2>evaML - Evaluation Report</h2>
+              <div class="table-responsive">
+                <table class="table table-sm">
+                  <thead>
+                    <tr>
+                      <th>Classifer</th>
+                      <th>Parameters</th>
+                      <th>Results</th>
+                      <th>Learning Curve</th>
+                    </tr>
+                  </thead>
+                  <tbody>
     """
 
+    html_mid = """"""
+
+    for classifier in json_report:
+        classifier_value = json_report[classifier]
+        for param_set in classifier_value:
+            param_set_value = classifier_value[param_set]
+            params = param_set_value["params"]
+            results = param_set_value["results"]
+            learning_curve_plot_name = param_set_value["learning_curve_plot_name"]
+
+            html_mid = html_mid + """<tr>
+                                  <td style="width: 25%">
+                                    <samp>""" + str(classifier) + """</samp>
+                                  </td>
+                                  <td style="width: 25%">
+                                    <table class="table table-sm table-borderless">
+                                      <tbody>"""
+
+            for param in params:
+                html_mid = html_mid + """
+                <tr>
+                  <td class="text-uppercase"><samp>""" + str(param) + """</samp></td> 
+                  <td class="text-uppercase text-xs-right"><samp>""" + str(params[param]) + """</samp></td>
+                </tr>
+                """
+
+            html_mid = html_mid + """</tbody>
+                        </table>
+                      </td>
+                      <td style="width: 25%">
+                        <table class="table table-sm table-borderless">
+                          <tbody>"""
+
+            for result in results:
+                html_mid = html_mid + """
+                <tr>
+                  <td class="text-uppercase"><samp>"""+ str(result) +"""</samp></td> 
+                  <td class="text-uppercase text-xs-right"><samp>"""+ str(results[result]) +"""</samp></td>
+                </tr>
+                """
+
+            html_mid = html_mid + """
+                          </tbody>
+                        </table>
+                      </td>
+                      <td style="width: 25%">
+                        <img src='learning_curves/"""+ str(learning_curve_plot_name) +""".png' class="img-fluid rounded mx-auto d-block" width="400">
+                      </td>
+                    </tr>
+                  </tbody>"""
+
+    html_end = """
+                </table>
+              </div>
+            </main>
+          </div>
+        </div>
+      </body>
+    </html>
+    """
+
+    html_report = html_start + html_mid + html_end
     with open(directory + '/report.html', 'w') as file:
         file.write(html_report)
 

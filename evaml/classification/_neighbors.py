@@ -40,13 +40,13 @@ class KNearestNeighbors(MLModel):
     """
     def __init__(self,
                  min_neighbors=7,
-                 max_neighbors=10,
+                 max_neighbors=21,
                  weights=('uniform', 'distance'),
                  algorithms=('auto', 'ball_tree', 'kd_tree', 'brute'),
-                 min_leaf_size=25,
-                 max_leaf_size=27,
+                 min_leaf_size=20,
+                 max_leaf_size=30,
                  min_p=1,
-                 max_p=3):
+                 max_p=5):
         """
 
         :param min_neighbors:
