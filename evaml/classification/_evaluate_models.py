@@ -63,7 +63,8 @@ def evaluate(X_train=None,
              X_test=None,
              y_test=None,
              classifiers=__classifiers_list__,
-             directory='evaluation'):
+             directory='evaluation',
+             reports_per_classifier=10):
     """
 
     :param X_train:
@@ -81,11 +82,12 @@ def evaluate(X_train=None,
     for classifier in classifiers:
 
         start = time.time()
-        evaluation_metrics, learning_curve_data_all = classifier.evaluate_knn_multiprocessing(X, y, X_val, y_val, X_test, y_test)
+        evaluation_metrics, learning_curve_data_all = classifier.evaluate_knn_multiprocessing(
+            X, y, X_val, y_val, X_test, y_test, reports_per_classifier)
         end = time.time()
         logger.info(classifier.__class__.__name__ + " >>> Time taken: " + str(round(end - start, 2)))
 
-        __plot_learning_curves(learning_curve_data_all, directory)
+        # __plot_learning_curves(learning_curve_data_all, directory) # uncomment this
         evaluation_metrics_all_models[classifier.__class__.__name__] = evaluation_metrics
 
     return __create_report(evaluation_metrics_all_models, directory)
@@ -115,7 +117,7 @@ def __plot_learning_curve(learning_curve_data, learning_curve_data_name, directo
 
 def __create_report(evaluation_metrics_all_models, directory):
     __create_json_report(evaluation_metrics_all_models, directory)
-    __create_html_report(directory)
+    # __create_html_report(directory) # uncomment this
 
 
 def __create_json_report(evaluation_metrics_all_models, directory):

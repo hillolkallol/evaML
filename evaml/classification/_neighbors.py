@@ -40,13 +40,13 @@ class KNearestNeighbors(MLModel):
     """
     def __init__(self,
                  min_neighbors=7,
-                 max_neighbors=21,
+                 max_neighbors=15, #21,
                  weights=('uniform', 'distance'),
                  algorithms=('auto', 'ball_tree', 'kd_tree', 'brute'),
                  min_leaf_size=20,
-                 max_leaf_size=30,
+                 max_leaf_size=25, #30,
                  min_p=1,
-                 max_p=5):
+                 max_p=3):
         """
 
         :param min_neighbors:
@@ -112,7 +112,7 @@ class KNearestNeighbors(MLModel):
 
         return params, results, learning_curve_data, learning_curve_plot_name
 
-    def evaluate_knn_multiprocessing(self, X_train, y_train, X_val, y_val, X_test, y_test):
+    def evaluate_knn_multiprocessing(self, X_train, y_train, X_val, y_val, X_test, y_test, reports_per_classifier):
         """
 
         :param X_train:
@@ -129,10 +129,10 @@ class KNearestNeighbors(MLModel):
             output = executor.map(self.evaluate_knn, params)
 
             param_set = 1
-            for params, results, learning_curve_data, learning_curve_plot_name in output:
+            for parameters, results, learning_curve_data, learning_curve_plot_name in output:
 
                 param_result_set = {}
-                param_result_set['params'] = params
+                param_result_set['params'] = parameters
                 param_result_set['results'] = results
                 param_result_set['learning_curve_plot_name'] = learning_curve_plot_name
 
@@ -141,4 +141,20 @@ class KNearestNeighbors(MLModel):
                 evaluation_metrics['param-set-' + str(param_set)] = param_result_set
                 param_set += 1
 
-        return evaluation_metrics, learning_curve_data_all
+        evaluation_metrics = dict(sorted(evaluation_metrics.items(),
+                            reverse=True,
+                            key=lambda item: (item[1]['results']['f-score'],
+                                              item[1]['results']['accuracy']))[:reports_per_classifier])
+
+        learning_curve_data_minimized = self._learning_curve_data_minimized(learning_curve_data_all,
+                                                                            evaluation_metrics)
+        return evaluation_metrics, learning_curve_data_minimized
+
+    def _learning_curve_data_minimized(self, learning_curve_data_all, evaluation_metrics):
+        learning_curve_data_minimized = {}
+
+        for param_set_key in evaluation_metrics:
+            learning_curve_plot_name = evaluation_metrics[param_set_key]['learning_curve_plot_name']
+            learning_curve_data_minimized[learning_curve_plot_name] = learning_curve_data_all[learning_curve_plot_name]
+
+        return learning_curve_data_minimized
