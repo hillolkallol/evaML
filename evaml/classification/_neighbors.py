@@ -107,8 +107,8 @@ class KNearestNeighbors(MLModel):
         results['f-score'] = fscore
         results['accuracy'] = accuracy
 
-        learning_curve_plot_name = "learning_curve_" + str(k_neighbors) + "_" \
-                                   + str(weight) + "_" + str(algorithm) + "_" + str(leaf_size) + "_" + str(p)
+        learning_curve_plot_name = "learning_curve_" + str(knn_model.__class__.__name__) + "_" + str(k_neighbors) \
+                                   + "_" + str(weight) + "_" + str(algorithm) + "_" + str(leaf_size) + "_" + str(p)
 
         return params, results, learning_curve_data, learning_curve_plot_name
 

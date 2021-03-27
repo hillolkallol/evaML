@@ -14,7 +14,7 @@
                 "f-score": 0.93,
                 "accuracy": 0.93
             },
-            "learning_curve_plot_name": "learning_curve_19_uniform_auto_20_1"
+            "learning_curve_plot_name": "learning_curve_KNeighborsClassifier_19_uniform_auto_20_1"
         },
         "param-set-2646": {
             "params": {
@@ -30,7 +30,7 @@
                 "f-score": 0.93,
                 "accuracy": 0.93
             },
-            "learning_curve_plot_name": "learning_curve_19_uniform_auto_21_1"
+            "learning_curve_plot_name": "learning_curve_KNeighborsClassifier_19_uniform_auto_21_1"
         },
         "param-set-2651": {
             "params": {
@@ -46,7 +46,7 @@
                 "f-score": 0.93,
                 "accuracy": 0.93
             },
-            "learning_curve_plot_name": "learning_curve_19_uniform_auto_22_1"
+            "learning_curve_plot_name": "learning_curve_KNeighborsClassifier_19_uniform_auto_22_1"
         },
         "param-set-2656": {
             "params": {
@@ -62,7 +62,7 @@
                 "f-score": 0.93,
                 "accuracy": 0.93
             },
-            "learning_curve_plot_name": "learning_curve_19_uniform_auto_23_1"
+            "learning_curve_plot_name": "learning_curve_KNeighborsClassifier_19_uniform_auto_23_1"
         },
         "param-set-2751": {
             "params": {
@@ -78,7 +78,7 @@
                 "f-score": 0.93,
                 "accuracy": 0.93
             },
-            "learning_curve_plot_name": "learning_curve_19_uniform_kd_tree_20_1"
+            "learning_curve_plot_name": "learning_curve_KNeighborsClassifier_19_uniform_kd_tree_20_1"
         },
         "param-set-2756": {
             "params": {
@@ -94,7 +94,7 @@
                 "f-score": 0.93,
                 "accuracy": 0.93
             },
-            "learning_curve_plot_name": "learning_curve_19_uniform_kd_tree_21_1"
+            "learning_curve_plot_name": "learning_curve_KNeighborsClassifier_19_uniform_kd_tree_21_1"
         },
         "param-set-2761": {
             "params": {
@@ -110,7 +110,7 @@
                 "f-score": 0.93,
                 "accuracy": 0.93
             },
-            "learning_curve_plot_name": "learning_curve_19_uniform_kd_tree_22_1"
+            "learning_curve_plot_name": "learning_curve_KNeighborsClassifier_19_uniform_kd_tree_22_1"
         },
         "param-set-2766": {
             "params": {
@@ -126,7 +126,7 @@
                 "f-score": 0.93,
                 "accuracy": 0.93
             },
-            "learning_curve_plot_name": "learning_curve_19_uniform_kd_tree_23_1"
+            "learning_curve_plot_name": "learning_curve_KNeighborsClassifier_19_uniform_kd_tree_23_1"
         },
         "param-set-3101": {
             "params": {
@@ -142,7 +142,7 @@
                 "f-score": 0.93,
                 "accuracy": 0.93
             },
-            "learning_curve_plot_name": "learning_curve_21_uniform_auto_24_1"
+            "learning_curve_plot_name": "learning_curve_KNeighborsClassifier_21_uniform_auto_24_1"
         },
         "param-set-3106": {
             "params": {
@@ -158,7 +158,7 @@
                 "f-score": 0.93,
                 "accuracy": 0.93
             },
-            "learning_curve_plot_name": "learning_curve_21_uniform_auto_25_1"
+            "learning_curve_plot_name": "learning_curve_KNeighborsClassifier_21_uniform_auto_25_1"
         }
     }
 }
