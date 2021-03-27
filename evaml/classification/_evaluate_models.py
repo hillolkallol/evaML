@@ -87,7 +87,7 @@ def evaluate(X_train=None,
         end = time.time()
         logger.info(classifier.__class__.__name__ + " >>> Time taken: " + str(round(end - start, 2)))
 
-        # __plot_learning_curves(learning_curve_data_all, directory) # uncomment this
+        __plot_learning_curves(learning_curve_data_all, directory)
         evaluation_metrics_all_models[classifier.__class__.__name__] = evaluation_metrics
 
     return __create_report(evaluation_metrics_all_models, directory)
@@ -117,7 +117,7 @@ def __plot_learning_curve(learning_curve_data, learning_curve_data_name, directo
 
 def __create_report(evaluation_metrics_all_models, directory):
     __create_json_report(evaluation_metrics_all_models, directory)
-    # __create_html_report(directory) # uncomment this
+    __create_html_report(directory)
 
 
 def __create_json_report(evaluation_metrics_all_models, directory):
@@ -180,46 +180,51 @@ def __create_html_report(directory):
             results = param_set_value["results"]
             learning_curve_plot_name = param_set_value["learning_curve_plot_name"]
 
-            html_mid = html_mid + """<tr>
-                                  <td style="width: 25%">
-                                    <samp>""" + str(classifier) + """</samp>
-                                  </td>
-                                  <td style="width: 25%">
-                                    <table class="table table-sm table-borderless">
-                                      <tbody>"""
+            html_mid = html_mid + """
+                        <tr>
+                          <td style="width: 25%">
+                            <samp>""" + str(classifier) + """</samp>
+                          </td>
+                          <td style="width: 25%">
+                            <table class="table table-sm table-borderless">
+                              <tbody>
+                                """
 
             for param in params:
                 html_mid = html_mid + """
-                <tr>
-                  <td class="text-uppercase"><samp>""" + str(param) + """</samp></td> 
-                  <td class="text-uppercase text-xs-right"><samp>""" + str(params[param]) + """</samp></td>
-                </tr>
-                """
-
-            html_mid = html_mid + """</tbody>
-                        </table>
-                      </td>
-                      <td style="width: 25%">
-                        <table class="table table-sm table-borderless">
-                          <tbody>"""
-
-            for result in results:
-                html_mid = html_mid + """
-                <tr>
-                  <td class="text-uppercase"><samp>"""+ str(result) +"""</samp></td> 
-                  <td class="text-uppercase text-xs-right"><samp>"""+ str(results[result]) +"""</samp></td>
-                </tr>
+                                <tr>
+                                  <td class="text-uppercase"><samp>""" + str(param) + """</samp></td> 
+                                  <td class="text-uppercase text-xs-right"><samp>""" + str(params[param]) + """</samp></td>
+                                </tr>
                 """
 
             html_mid = html_mid + """
-                          </tbody>
-                        </table>
-                      </td>
-                      <td style="width: 25%">
-                        <img src='learning_curves/"""+ str(learning_curve_plot_name) +""".png' class="img-fluid rounded mx-auto d-block" width="400">
-                      </td>
-                    </tr>
-                  </tbody>"""
+                              </tbody>
+                            </table>
+                          </td>
+                          <td style="width: 25%">
+                            <table class="table table-sm table-borderless">
+                              <tbody>
+                              """
+
+            for result in results:
+                html_mid = html_mid + """
+                                <tr>
+                                  <td class="text-uppercase"><samp>"""+ str(result) +"""</samp></td> 
+                                  <td class="text-uppercase text-xs-right"><samp>"""+ str(results[result]) +"""</samp></td>
+                                </tr>
+                """
+
+            html_mid = html_mid + """
+                              </tbody>
+                            </table>
+                          </td>
+                          <td style="width: 25%">
+                            <img src='learning_curves/"""+ str(learning_curve_plot_name) +""".png' class="img-fluid rounded mx-auto d-block" width="400">
+                          </td>
+                        </tr>
+                      </tbody>
+                      """
 
     html_end = """
                 </table>

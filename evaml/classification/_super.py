@@ -37,7 +37,7 @@ class MLModel:
     :argument
     """
     _START_DATA_SIZE = 25
-    _INCREMENT_RATE = 5
+    _INCREMENT_RATE = 2
 
     def _generate_evaluation_metrics(self, model, X_train, y_train, X_val, y_val, X_test, y_test):
         """
