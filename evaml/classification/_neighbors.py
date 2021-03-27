@@ -142,7 +142,19 @@ class KNearestNeighbors(MLModel):
                 param_set += 1
 
         evaluation_metrics = dict(sorted(evaluation_metrics.items(),
-                            reverse=True, key=lambda item: (item[1]['results']['f-score'],
-                                                            item[1]['results']['accuracy'])))
+                            reverse=True,
+                            key=lambda item: (item[1]['results']['f-score'],
+                                              item[1]['results']['accuracy']))[:reports_per_classifier])
 
-        return dict(itertools.islice(evaluation_metrics.items(), reports_per_classifier)), learning_curve_data_all
+        learning_curve_data_minimized = self._learning_curve_data_minimized(learning_curve_data_all,
+                                                                            evaluation_metrics)
+        return evaluation_metrics, learning_curve_data_minimized
+
+    def _learning_curve_data_minimized(self, learning_curve_data_all, evaluation_metrics):
+        learning_curve_data_minimized = {}
+
+        for param_set_key in evaluation_metrics:
+            learning_curve_plot_name = evaluation_metrics[param_set_key]['learning_curve_plot_name']
+            learning_curve_data_minimized[learning_curve_plot_name] = learning_curve_data_all[learning_curve_plot_name]
+
+        return learning_curve_data_minimized
