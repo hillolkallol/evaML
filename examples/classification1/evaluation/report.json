@@ -1,164 +1,164 @@
 {
     "KNearestNeighbors": {
-        "param-set-578": {
+        "param-set-2641": {
             "params": {
-                "neighbors": 15,
+                "neighbors": 19,
                 "weight": "uniform",
                 "algorithm": "auto",
                 "leaf-size": 20,
-                "p": 2
+                "p": 1
             },
             "results": {
-                "precision": 0.87,
-                "recall": 0.87,
-                "f-score": 0.86,
-                "accuracy": 0.87
+                "precision": 0.94,
+                "recall": 0.93,
+                "f-score": 0.93,
+                "accuracy": 0.93
             },
-            "learning_curve_plot_name": "learning_curve_15_uniform_auto_20_2"
+            "learning_curve_plot_name": "learning_curve_19_uniform_auto_20_1"
         },
-        "param-set-579": {
+        "param-set-2646": {
             "params": {
-                "neighbors": 15,
+                "neighbors": 19,
                 "weight": "uniform",
                 "algorithm": "auto",
+                "leaf-size": 21,
+                "p": 1
+            },
+            "results": {
+                "precision": 0.94,
+                "recall": 0.93,
+                "f-score": 0.93,
+                "accuracy": 0.93
+            },
+            "learning_curve_plot_name": "learning_curve_19_uniform_auto_21_1"
+        },
+        "param-set-2651": {
+            "params": {
+                "neighbors": 19,
+                "weight": "uniform",
+                "algorithm": "auto",
+                "leaf-size": 22,
+                "p": 1
+            },
+            "results": {
+                "precision": 0.94,
+                "recall": 0.93,
+                "f-score": 0.93,
+                "accuracy": 0.93
+            },
+            "learning_curve_plot_name": "learning_curve_19_uniform_auto_22_1"
+        },
+        "param-set-2656": {
+            "params": {
+                "neighbors": 19,
+                "weight": "uniform",
+                "algorithm": "auto",
+                "leaf-size": 23,
+                "p": 1
+            },
+            "results": {
+                "precision": 0.94,
+                "recall": 0.93,
+                "f-score": 0.93,
+                "accuracy": 0.93
+            },
+            "learning_curve_plot_name": "learning_curve_19_uniform_auto_23_1"
+        },
+        "param-set-2751": {
+            "params": {
+                "neighbors": 19,
+                "weight": "uniform",
+                "algorithm": "kd_tree",
                 "leaf-size": 20,
-                "p": 3
+                "p": 1
             },
             "results": {
-                "precision": 0.87,
-                "recall": 0.87,
-                "f-score": 0.86,
-                "accuracy": 0.87
+                "precision": 0.94,
+                "recall": 0.93,
+                "f-score": 0.93,
+                "accuracy": 0.93
             },
-            "learning_curve_plot_name": "learning_curve_15_uniform_auto_20_3"
+            "learning_curve_plot_name": "learning_curve_19_uniform_kd_tree_20_1"
         },
-        "param-set-581": {
+        "param-set-2756": {
             "params": {
-                "neighbors": 15,
+                "neighbors": 19,
                 "weight": "uniform",
-                "algorithm": "auto",
+                "algorithm": "kd_tree",
                 "leaf-size": 21,
-                "p": 2
+                "p": 1
             },
             "results": {
-                "precision": 0.87,
-                "recall": 0.87,
-                "f-score": 0.86,
-                "accuracy": 0.87
+                "precision": 0.94,
+                "recall": 0.93,
+                "f-score": 0.93,
+                "accuracy": 0.93
             },
-            "learning_curve_plot_name": "learning_curve_15_uniform_auto_21_2"
+            "learning_curve_plot_name": "learning_curve_19_uniform_kd_tree_21_1"
         },
-        "param-set-582": {
+        "param-set-2761": {
             "params": {
-                "neighbors": 15,
+                "neighbors": 19,
                 "weight": "uniform",
-                "algorithm": "auto",
-                "leaf-size": 21,
-                "p": 3
-            },
-            "results": {
-                "precision": 0.87,
-                "recall": 0.87,
-                "f-score": 0.86,
-                "accuracy": 0.87
-            },
-            "learning_curve_plot_name": "learning_curve_15_uniform_auto_21_3"
-        },
-        "param-set-584": {
-            "params": {
-                "neighbors": 15,
-                "weight": "uniform",
-                "algorithm": "auto",
+                "algorithm": "kd_tree",
                 "leaf-size": 22,
-                "p": 2
+                "p": 1
             },
             "results": {
-                "precision": 0.87,
-                "recall": 0.87,
-                "f-score": 0.86,
-                "accuracy": 0.87
+                "precision": 0.94,
+                "recall": 0.93,
+                "f-score": 0.93,
+                "accuracy": 0.93
             },
-            "learning_curve_plot_name": "learning_curve_15_uniform_auto_22_2"
+            "learning_curve_plot_name": "learning_curve_19_uniform_kd_tree_22_1"
         },
-        "param-set-585": {
+        "param-set-2766": {
             "params": {
-                "neighbors": 15,
+                "neighbors": 19,
                 "weight": "uniform",
-                "algorithm": "auto",
-                "leaf-size": 22,
-                "p": 3
-            },
-            "results": {
-                "precision": 0.87,
-                "recall": 0.87,
-                "f-score": 0.86,
-                "accuracy": 0.87
-            },
-            "learning_curve_plot_name": "learning_curve_15_uniform_auto_22_3"
-        },
-        "param-set-587": {
-            "params": {
-                "neighbors": 15,
-                "weight": "uniform",
-                "algorithm": "auto",
+                "algorithm": "kd_tree",
                 "leaf-size": 23,
-                "p": 2
+                "p": 1
             },
             "results": {
-                "precision": 0.87,
-                "recall": 0.87,
-                "f-score": 0.86,
-                "accuracy": 0.87
+                "precision": 0.94,
+                "recall": 0.93,
+                "f-score": 0.93,
+                "accuracy": 0.93
             },
-            "learning_curve_plot_name": "learning_curve_15_uniform_auto_23_2"
+            "learning_curve_plot_name": "learning_curve_19_uniform_kd_tree_23_1"
         },
-        "param-set-588": {
+        "param-set-3101": {
             "params": {
-                "neighbors": 15,
-                "weight": "uniform",
-                "algorithm": "auto",
-                "leaf-size": 23,
-                "p": 3
-            },
-            "results": {
-                "precision": 0.87,
-                "recall": 0.87,
-                "f-score": 0.86,
-                "accuracy": 0.87
-            },
-            "learning_curve_plot_name": "learning_curve_15_uniform_auto_23_3"
-        },
-        "param-set-590": {
-            "params": {
-                "neighbors": 15,
+                "neighbors": 21,
                 "weight": "uniform",
                 "algorithm": "auto",
                 "leaf-size": 24,
-                "p": 2
+                "p": 1
             },
             "results": {
-                "precision": 0.87,
-                "recall": 0.87,
-                "f-score": 0.86,
-                "accuracy": 0.87
+                "precision": 0.94,
+                "recall": 0.93,
+                "f-score": 0.93,
+                "accuracy": 0.93
             },
-            "learning_curve_plot_name": "learning_curve_15_uniform_auto_24_2"
+            "learning_curve_plot_name": "learning_curve_21_uniform_auto_24_1"
         },
-        "param-set-593": {
+        "param-set-3106": {
             "params": {
-                "neighbors": 15,
+                "neighbors": 21,
                 "weight": "uniform",
                 "algorithm": "auto",
                 "leaf-size": 25,
-                "p": 2
+                "p": 1
             },
             "results": {
-                "precision": 0.87,
-                "recall": 0.87,
-                "f-score": 0.86,
-                "accuracy": 0.87
+                "precision": 0.94,
+                "recall": 0.93,
+                "f-score": 0.93,
+                "accuracy": 0.93
             },
-            "learning_curve_plot_name": "learning_curve_15_uniform_auto_25_2"
+            "learning_curve_plot_name": "learning_curve_21_uniform_auto_25_1"
         }
     }
 }
