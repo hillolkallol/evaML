@@ -50,3 +50,55 @@ _generate_params_test()
 #
 # obj = KNearestNeighborsTest()
 # obj.test()
+
+
+test_dict = {
+           "param-set-578":{
+              "params":{
+                 "neighbors":15,
+                 "weight":"uniform",
+                 "algorithm":"auto",
+                 "leaf-size":20,
+                 "p":2
+              },
+              "results":{
+                 "precision":0.87,
+                 "recall":0.87,
+                 "f-score":0.86,
+                 "accuracy":0.86
+              },
+              "learning_curve_plot_name":"learning_curve_15_uniform_auto_20_2"
+           },
+           "param-set-579":{
+              "params":{
+                 "neighbors":15,
+                 "weight":"uniform",
+                 "algorithm":"auto",
+                 "leaf-size":20,
+                 "p":3
+              },
+              "results":{
+                 "precision":0.87,
+                 "recall":0.87,
+                 "f-score":0.86,
+                 "accuracy":0.92
+              },
+              "learning_curve_plot_name":"learning_curve_15_uniform_auto_20_3"
+           },
+           "param-set-581":{
+              "params":{
+                 "neighbors":15,
+                 "weight":"uniform",
+                 "algorithm":"auto",
+                 "leaf-size":21,
+                 "p":2
+              },
+              "results":{
+                 "precision":0.87,
+                 "recall":0.87,
+                 "f-score":0.86,
+                 "accuracy":0.87
+              },
+              "learning_curve_plot_name":"learning_curve_15_uniform_auto_21_2"
+           }
+        }
