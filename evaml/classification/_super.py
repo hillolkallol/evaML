@@ -37,7 +37,7 @@ class MLModel:
     :argument
     """
     _START_DATA_SIZE = 25
-    _INCREMENT_RATE = 2
+    _INCREMENT_RATE = 5
 
     def _generate_evaluation_metrics(self, model, X_train, y_train, X_val, y_val, X_test, y_test):
         """
@@ -49,7 +49,21 @@ class MLModel:
         :param y_val:
         :return:
         """
-        learning_curve_data = []
+
+        precision, recall, fscore, support, accuracy = self._precision_recall_fscore_support_accuracy(model, X_train, y_train, X_test, y_test)
+        learning_curve_data = self._learning_curve_accuracy_measurement(model, X_train, y_train, X_val, y_val)
+        return precision, recall, fscore, support, accuracy, learning_curve_data
+
+    def _precision_recall_fscore_support_accuracy(self, model, X_train, y_train, X_test, y_test):
+        model.fit(X_train, y_train)
+        y_pred = model.predict(X_test)
+        precision, recall, fscore, support = precision_recall_fscore_support(y_test, y_pred, average='weighted')
+        accuracy = self._calculate_accuracy(model, X_test, y_test)
+
+        return round(precision, 2), round(recall, 2), round(fscore, 2), support, round(accuracy, 2)
+
+    def _learning_curve_accuracy_measurement(self, model, X_train, y_train, X_val, y_val):
+        learning_curve_accuracy = []
 
         start = self._START_DATA_SIZE
         end = len(y_train)
@@ -60,18 +74,9 @@ class MLModel:
             train_accuracy = self._calculate_accuracy(model, X_train[:data_size, :], y_train[:data_size])
             val_accuracy = self._calculate_accuracy(model, X_val, y_val)
 
-            learning_curve_data.append([data_size, round(train_accuracy, 2), round(val_accuracy, 2)])
+            learning_curve_accuracy.append([data_size, round(train_accuracy, 2), round(val_accuracy, 2)])
 
-        precision, recall, fscore, support, accuracy = self._precision_recall_fscore_support_accuracy(model, X_train, y_train, X_test, y_test)
-        return precision, recall, fscore, support, accuracy, learning_curve_data
-
-    def _precision_recall_fscore_support_accuracy(self, model, X_train, y_train, X_test, y_test):
-        model.fit(X_train, y_train)
-        y_pred = model.predict(X_test)
-        precision, recall, fscore, support = precision_recall_fscore_support(y_test, y_pred, average='weighted')
-        accuracy = self._calculate_accuracy(model, X_test, y_test)
-
-        return round(precision, 2), round(recall, 2), round(fscore, 2), support, round(accuracy, 2)
+        return learning_curve_accuracy
 
     def _calculate_accuracy(self, model, X, y):
         return model.score(X, y)
