@@ -29,15 +29,17 @@
 from sklearn.metrics import classification_report
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import precision_recall_fscore_support
-from sklearn.metrics import accuracy_score
+
 
 class MLModel:
     """
 
     :argument
     """
-    _START_DATA_SIZE = 25
-    _INCREMENT_RATE = 5
+
+    def __init__(self, learning_curve_start_data_size, learning_curve_increment_rate):
+        self.learning_curve_start_data_size = learning_curve_start_data_size
+        self.learning_curve_increment_rate = learning_curve_increment_rate
 
     def _generate_evaluation_metrics(self, model, X_train, y_train, X_val, y_val, X_test, y_test):
         """
@@ -65,11 +67,13 @@ class MLModel:
     def _learning_curve_accuracy_measurement(self, model, X_train, y_train, X_val, y_val):
         learning_curve_accuracy = []
 
-        start = self._START_DATA_SIZE
+        start = self.learning_curve_start_data_size
         end = len(y_train)
-        increment = int((end * self._INCREMENT_RATE) / 100)
+        increment = int((end * self.learning_curve_increment_rate) / 100)
 
-        for data_size in range(start, end, increment):
+        for idx in range(start, end + increment, increment): # [10, 15, 20, 25, 30, 35], 10 --- 45
+            data_size = min(idx, end)
+
             model.fit(X_train[:data_size, :], y_train[:data_size])
             train_accuracy = self._calculate_accuracy(model, X_train[:data_size, :], y_train[:data_size])
             val_accuracy = self._calculate_accuracy(model, X_val, y_val)
@@ -86,3 +90,9 @@ class MLModel:
 
     def _generate_confusion_matrix(self, y_true, y_pred):
         return confusion_matrix(y_true, y_pred)
+
+    def set_learning_curve_start_data_size(self, size):
+        self.learning_curve_start_data_size = size
+
+    def set_learning_curve_increment_rate(self, rate):
+        self.learning_curve_increment_rate = rate
