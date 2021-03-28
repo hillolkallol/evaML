@@ -58,10 +58,10 @@ logger.addHandler(ch)
 __classifiers_list__ = (KNearestNeighbors(),)
 
 
-def evaluate(X_train=None,
-             y_train=None,
-             X_test=None,
-             y_test=None,
+def evaluate(X_train,
+             y_train,
+             X_test,
+             y_test,
              classifiers=__classifiers_list__,
              report_directory='evaluation',
              reports_per_classifier=10,
@@ -87,7 +87,7 @@ def evaluate(X_train=None,
         classifier.set_learning_curve_increment_rate(learning_curve_increment_rate)
 
         start = time.time()
-        evaluation_metrics, learning_curve_data_all = classifier.evaluate_knn_multiprocessing(
+        evaluation_metrics, learning_curve_data_all = classifier.evaluate_model_multiprocessing(
             X, y, X_val, y_val, X_test, y_test, reports_per_classifier)
         end = time.time()
         logger.info(classifier.__class__.__name__ + " >>> Time taken: " + str(round(end - start, 2)))

@@ -116,7 +116,7 @@ class KNearestNeighbors(MLModel):
 
         return params, results, learning_curve_data, learning_curve_plot_name
 
-    def evaluate_knn_multiprocessing(self, X_train, y_train, X_val, y_val, X_test, y_test, reports_per_classifier):
+    def evaluate_model_multiprocessing(self, X_train, y_train, X_val, y_val, X_test, y_test, reports_per_classifier):
         """
 
         :param X_train:
