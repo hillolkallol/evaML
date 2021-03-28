@@ -46,7 +46,9 @@ class KNearestNeighbors(MLModel):
                  min_leaf_size=20,
                  max_leaf_size=30,
                  min_p=1,
-                 max_p=5):
+                 max_p=5,
+                 learning_curve_start_data_size=25,
+                 learning_curve_increment_rate=20):
         """
 
         :param min_neighbors:
@@ -58,6 +60,8 @@ class KNearestNeighbors(MLModel):
         :param min_p:
         :param max_p:
         """
+        super().__init__(learning_curve_start_data_size, learning_curve_increment_rate)
+
         self.__NEIGHBORS = [k_neighbors for k_neighbors in range(min_neighbors, max_neighbors+1, 2)]
         self.__WEIGHTS = weights
         self.__ALGORITHMS = algorithms
