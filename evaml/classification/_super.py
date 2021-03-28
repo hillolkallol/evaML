@@ -78,9 +78,6 @@ class MLModel:
 
         return learning_curve_accuracy
 
-    def _learning_curve_error_measurement(self, model, X_train, y_train, X_val, y_val):
-        pass
-
     def _calculate_accuracy(self, model, X, y):
         return model.score(X, y)
 
