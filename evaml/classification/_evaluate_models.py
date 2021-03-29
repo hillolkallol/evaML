@@ -65,17 +65,70 @@ def evaluate(X_train,
              classifiers=__classifiers_list__,
              report_directory='evaluation',
              reports_per_classifier=10,
-             learning_curve_start_data_size=25,
+             learning_curve_min_data_size=25,
              learning_curve_increment_rate=20):
     """
+    Evaluates machine learning models, tuning hyperparameters and returns JSON report.
 
     :param X_train:
+        Data Type - Array like.
+        X coordinates of training dataset.
+
     :param y_train:
+        Data Type - Array like.
+        y coordinates of training dataset.
+
     :param X_test:
+        Data Type - Array like.
+        X coordinates of test dataset.
+
     :param y_test:
+        Data Type - Array like.
+        y coordinates of test dataset.
+
     :param classifiers:
-    :param directory:
+        Data Type - Object.
+        List of machine learning classifiers.
+
+    :param report_directory:
+        Data Type - String.
+        The path to store the report.
+
+    :param reports_per_classifier:
+        Data Type - Integer.
+        Number of top results per classifier that are picked to add in the report.
+
+    :param learning_curve_min_data_size:
+        Data Type - Integer.
+        The minimum data size for the learning curve.
+        If not given, the default value will be used. Default is 25.
+
+    :param learning_curve_increment_rate:
+        Data Type - Integer.
+        The increment rate for the learning curve.
+        If not given, the default value will be used. Default is 25.
+
     :return:
+        Returns the JSON report.
+
+    Examples
+    --------
+    >>> from sklearn import datasets
+    >>> from sklearn.model_selection import train_test_split
+    >>> from evaml.classification import evaluate
+    >>>
+    >>> iris = datasets.load_iris()
+    >>> X = iris.data[:, :2]  # we only take the first two features.
+    >>> y = iris.target
+    >>> X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=.2, random_state=42)
+    >>>
+    >>> if __name__ == '__main__':
+    >>>     evaluation_metrics_all_models = evaluate(X_train, y_train, X_test, y_test)
+
+    Notes
+    -----
+    It is mendatory in windows to keep evaluate() function
+    inside __name__ == '__main__': and also recommended in Linux.
     """
     __create_directories(report_directory)
     evaluation_metrics_all_models = {}
@@ -83,7 +136,7 @@ def evaluate(X_train,
 
     for classifier in classifiers:
 
-        classifier.set_learning_curve_start_data_size(learning_curve_start_data_size)
+        classifier.set_learning_curve_min_data_size(learning_curve_min_data_size)
         classifier.set_learning_curve_increment_rate(learning_curve_increment_rate)
 
         start = time.time()
@@ -99,12 +152,37 @@ def evaluate(X_train,
 
 
 def __plot_learning_curves(learning_curve_data_all, directory):
+    """
+    Generates and saves learning curve.
+
+    :param learning_curve_data_all:
+        Data Type - List of tuple.
+        List of tuples that contains training and validation accuracy.
+
+    :param directory:
+        Data Type - String.
+        The path to store the report.
+    """
     for learning_curve_data_name in learning_curve_data_all:
         # print(learning_curve_data_name)
         __plot_learning_curve(np.array(learning_curve_data_all[learning_curve_data_name]), learning_curve_data_name, directory)
 
 
 def __plot_learning_curve(learning_curve_data, learning_curve_data_name, directory):
+    """
+    Generates and saves learning curve.
+
+    :param learning_curve_data:
+        Data Type - List of tuple.
+        List of tuples that contains training and validation accuracy.
+
+    :param learning_curve_data_name:
+        Data Type - String
+        Learning curve plot jpg name.
+
+    :param directory:
+        The path to store the report.
+    """
 
     datasize = learning_curve_data[:, 0]
     train_accuracy = learning_curve_data[:, 1]
@@ -126,6 +204,15 @@ def __create_report(evaluation_metrics_all_models, directory):
 
 
 def __create_json_report(evaluation_metrics_all_models, directory):
+    """
+    Creates json report.
+
+    :param directory:
+        The path to store the report.
+
+    :return
+        returns json report.
+    """
     with open(directory + '/report.json', 'w') as f:
         json.dump(evaluation_metrics_all_models, f, indent=4)
 
@@ -133,6 +220,15 @@ def __create_json_report(evaluation_metrics_all_models, directory):
 
 
 def __read_json_report(directory):
+    """
+    Reads json report.
+
+    :param directory:
+        The path to store the report.
+
+    :return
+        returns json report.
+    """
     with open(directory + '/report.json', 'r') as f:
         json_report = json.load(f)
 
@@ -140,11 +236,11 @@ def __read_json_report(directory):
 
 
 def __create_html_report(directory):
-
     """
+    Creates html report.
 
     :param directory:
-    :return:
+        The path to store the report.
     """
     json_report = __read_json_report(directory)
 
@@ -254,7 +350,3 @@ def __create_directories(directory):
 def __create_directory(directory):
     if not os.path.exists(directory):
         os.makedirs(directory)
-
-
-def __generate_summary():
-    pass
