@@ -212,8 +212,8 @@ class KNearestNeighbors(MLModel):
                                          algorithm=algorithm,
                                          leaf_size=leaf_size,
                                          p=p)
-        params = {}
-        results = {}
+        params = dict()
+        results = dict()
 
         precision, recall, fscore, support, accuracy, learning_curve_data = self._generate_evaluation_metrics(
             knn_model, X_train, y_train, X_val, y_val, X_test, y_test)
