@@ -30,30 +30,10 @@ from sklearn.model_selection import train_test_split
 from evaml.classification import KNearestNeighbors
 import matplotlib.pyplot as plt
 import numpy as np
-import logging
 import json
 import time
 import os
-
-####################################
-# Will separate the logger later
-# create logger
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
-
-# create console handler and set level to debug
-ch = logging.StreamHandler()
-ch.setLevel(logging.INFO)
-
-# create formatter
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-
-# add formatter to ch
-ch.setFormatter(formatter)
-
-# add ch to logger
-logger.addHandler(ch)
-###################################
+from evaml.logging import logger
 
 __classifiers_list__ = (KNearestNeighbors(),)
 
@@ -143,6 +123,7 @@ def evaluate(X_train,
         evaluation_metrics, learning_curve_data_all = classifier.evaluate_model_multiprocessing(
             X, y, X_val, y_val, X_test, y_test, reports_per_classifier)
         end = time.time()
+
         logger.info(classifier.__class__.__name__ + " >>> Time taken: " + str(round(end - start, 2)))
 
         __plot_learning_curves(learning_curve_data_all, report_directory)
